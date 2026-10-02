@@ -13,7 +13,7 @@ Built by iterating ~30 backtest cycles on **68 USDT-M perps × 3 timeframes × 6
 Two uncorrelated signal families, gated by a BTC-cycle anchor:
 
 ### 1. Trend leg — pullback-into-resumption
-Longs only when BTC cycle is bull/transition **and** 4h+1h structure agree (shorts mirrored). Entry is a **limit order** posted ~0.35 ATR inside the signal close — you never chase. SL from volatility + liquidity geometry; TP1 banked at 40%, the rest trails to TP2/3.
+Longs only when BTC cycle is bull/transition **and** 4h+1h structure agree (shorts mirrored). Entry is a **limit order** posted ~0.35 ATR inside the signal close — you never chase. SL from volatility + liquidity geometry; the full position trails to TP2/3 (no TP1 partial — runners measured better). Shorts use wider targets and a tight post-TP2 trail (squeeze dynamics differ from long rallies).
 
 ### 2. Range leg — capitulation fade (1h+ only)
 In chop (ADX 16–20 band, low efficiency ratio), when price extends ≥2.6 ATR from EMA50 and closes at the extreme (**capitulation close** — rejection wicks were measured losers), fade back to the mean. TP = EMA50, SL 1.5 ATR, max 24 bars, **longs only** by default — rip-fades measured ~breakeven because they fight crypto's short-squeeze flows.
@@ -22,19 +22,20 @@ Trend signals preempt pending range orders, so the two legs never fight.
 
 ## Backtest results (the honest version)
 
-68 symbols × 15m/1h/4h, 2020–2026, fees + slippage included:
+101 Binance USDT-M perps × 15m/1h/4h, 2020–2026, fees + slippage included (v18, latest):
 
 | Metric | Value |
 |---|---|
-| Trades | 31 |
-| Win rate | **87%** |
-| Avg | +1.73R |
-| Net | +53.6R |
-| Profit factor | 13.74 |
-| Longs / Shorts | +1.82 / +1.67 avg |
-| All losers | 4/31, all trend shorts at −1R |
+| Trades | 48 |
+| Win rate | **71%** |
+| Avg | +2.29R |
+| Net | +110.0R |
+| Profit factor | 8.5 |
+| vs previous version | +58.0R on the same universe |
 
-**Frequency: this is a sniper.** ~31 signals across 6 years of data on 68 coins. It can sit quiet for weeks on one chart. That's the price of 87%.
+Earlier config on the smaller 68-coin universe: 31 trades, 87% WR, +53.6R, PF 13.7.
+
+**Frequency: this is a sniper.** ~48 signals across 6 years of data on 101 coins. It can sit quiet for weeks on one chart. That's the price of the edge.
 
 ### Where it works / doesn't (measured)
 
@@ -48,7 +49,7 @@ Trend signals preempt pending range orders, so the two legs never fight.
 ## How to use
 
 1. TradingView → open a perp chart (start: `BINANCE:LINKUSDT.P`, `THETAUSDT.P`, `ENAUSDT.P` on **1h**)
-2. Pine Editor → paste `v17.pine` → **Add to chart**
+2. Pine Editor → paste `v18.pine` → **Add to chart**
 3. When a label appears: **▲ LONG** / **▼ SHORT** (RNG = range fade)
    - White line = **LIMIT entry** — post a limit order there, valid ~5 bars, don't chase
    - Red zone = entry→SL · Green zone = entry→TP
@@ -86,7 +87,8 @@ Grounded in: BTC 4-year cycle structure (daily MA200 + position-in-4y-range), MT
 
 ## Files
 
-- `v17.pine` — the whole indicator, one file, no dependencies
+- `v18.pine` — the whole indicator, one file, no dependencies
+- `v17.pine` — previous version (kept for comparison)
 
 ## License
 
