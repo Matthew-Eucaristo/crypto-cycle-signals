@@ -6,10 +6,11 @@ indicator("Adaptive Signals V18 — Self-Calibrating Quant", shorttitle="Signals
 // percentile windows + HTF ladder scale to the chart timeframe. Research-only.
 // Default action is WAIT.
 //
-// V18 — measured wins over V17 (+58.0R → +110.0R on same 101-perp universe):
+// V18 — measured wins over V17 (+58.0R → +120.8R on same 101-perp universe):
 //   short TP ×3, tight short trail ×0.05, longer pullback validity 15b,
 //   volRank≥30 entry floor, long post-TP1 +1R lock, no TP1 partial,
-//   range TP ×1.5, range pull 0.5×, tighter stop 2.6A.
+//   range TP ×1.5, range pull 0.5×, tighter stop 2.5A, border-pass B-tier
+//   (score within 6 of gate + ER≥0.35 + room → promoted), short +3R profit lock.
 // V17 — range-fade module: in chop (ADX 16-20, ER<0.15) fade >=2.6-ATR capitulation extensions back to EMA50.
 //       Longs-only default (short fades measured ~breakeven; dip fades +1.78 avgR). Trend signals preempt pending fades.
 //       Backtest (68 USDT-M perps x 15m/1h/4h, 2020-2026, honest sim): 31 trades, 87% WR, +1.73 avgR, +53.6R, PF 13.7.
