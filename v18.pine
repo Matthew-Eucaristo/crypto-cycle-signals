@@ -126,6 +126,7 @@ float sTpM = input.float(3.0, "Short TP multiplier", minval=0.5, maxval=5.0, ste
 float lTpM = input.float(1.2, "Long TP multiplier", minval=0.5, maxval=3.0, step=0.1, group=G_ADV, active=showAdv, display=display.none)
 float sTrailM = input.float(0.05, "Short trail multiplier", minval=0.05, maxval=2.0, step=0.05, group=G_ADV, active=showAdv, display=display.none)
 float lGb = input.float(1.0, "Long post-TP1 lock (R)", minval=0.0, maxval=3.0, step=0.1, group=G_ADV, active=showAdv, display=display.none)
+float sGb = input.float(3.0, "Short post-TP1 lock (R)", minval=0.0, maxval=3.0, step=0.1, group=G_ADV, active=showAdv, display=display.none)
 float vlFloor = input.float(30.0, "Min volume rank", minval=0.0, maxval=60.0, step=5.0, group=G_ADV, active=showAdv, display=display.none)
 bool showB = input.bool(true, "B-tier signals (border pass)", tooltip="Borderline setups promoted when ER>=0.35 + room: score within 6 pts under the A gate in efficient tape. Lab/sim measured +5.9R net, ~60% WR combined.", group=G_ADV, active=showAdv, display=display.none)
 bool learnTargets = input.bool(false, "Adaptive TP (learned shrink)", tooltip="OFF = fixed targets (measured +14R better on the strict config). ON = shrink targets toward learned MFE quantiles.", group=G_ADV, active=showAdv, display=display.none)
@@ -1105,7 +1106,7 @@ if tradeActive and bar_index >= tradeEntryBar
             if tp1Hit and tradeBankedR == 0.0 and profTp1Frac > 0.0
                 tradeBankedR := profTp1Frac * pendT1m
             if tp1Hit and protectAfterTP1
-                tradeSL := math.min(tradeSL, tradeEntry - atr * 0.02)
+                tradeSL := math.min(tradeSL, tradeEntry - math.max(atr * 0.02, tradeRisk0 * sGb))
             if tp2Hit and trailAfterTP2
                 tradeSL := math.min(tradeSL, lowestSince + atr * trailATR * sTrailM)
             if not tradeRange and not h1Bear and held >= 2

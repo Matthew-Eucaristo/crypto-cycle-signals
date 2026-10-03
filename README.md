@@ -27,10 +27,10 @@ Trend signals preempt pending range orders, so the two legs never fight.
 | Metric | Value |
 |---|---|
 | Trades | 68 |
-| Win rate | **60%** |
-| Avg | +1.73R |
-| Net | +117.8R |
-| Profit factor | 5.3 |
+| Win rate | **62%** |
+| Avg | +1.78R |
+| Net | +120.8R |
+| Profit factor | 5.5 |
 | vs previous version | +58.0R on the same universe |
 
 Earlier config on the smaller 68-coin universe: 31 trades, 87% WR, +53.6R, PF 13.7.

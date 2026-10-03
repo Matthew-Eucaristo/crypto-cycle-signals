@@ -9,14 +9,14 @@ Honest sim (next-open/limit fills, slippage+fees), Binance USDT-M perps.
 | v17 (baseline) | 68 syms × 3 TF | 31 | 87.1% | +1.73 | +53.6 | 13.7 |
 | BASE17 on final universe | 101 syms × 3 TF | 44 | 77.3% | +1.32 | +58.0 | 6.5 |
 | v18 A-tier only | 101 syms × 3 TF | 50 | 68.0% | +2.24 | +111.9 | 7.7 |
-| **v18 final (A+B tiers)** | **101 syms × 3 TF** | **68** | **60.3%** | **+1.73** | **+117.8** | **5.3** |
+| **v18 final (A+B tiers)** | **101 syms × 3 TF** | **68** | **61.8%** | **+1.78** | **+120.8** | **5.5** |
 
-Apples-to-apples on the final 303-cell universe: v18 makes +117.8R vs BASE17's
+Apples-to-apples on the final 303-cell universe: v18 makes +120.8R vs BASE17's
 +58.0R — ~2× total R, with ~50% more trades than the pure-sniper config.
 
-Later-session additions: `stopATR 2.6→2.5` (+1.9R) and `border_pass=1` —
-borderline scores within 6 pts of the gate promoted when ER≥0.35 + room OK
-(+5.9R, the engine-validated "B-tier").
+Later-session additions: `stopATR 2.6→2.5` (+1.9R), `border_pass` 6-pt band
+(+5.9R, the engine-validated "B-tier"), and `s_gb=3.0` — shorts post-TP1 lock
+3R of profit (measured monotone to 3.0, +3R over BE-lock).
 
 ## Adopted deltas (each measured; cumulative order)
 
@@ -33,7 +33,8 @@ borderline scores within 6 pts of the gate promoted when ER≥0.35 + room OK
 | `vl_lo=30` — volRank≥30 for trend entries | kills low-energy entries | +2.8 |
 | `stopATR=2.6→2.5` (≥1h; was 2.8) | more valid entries at WR cost | +8→+9.9 |
 | `rg_pull_m=0.5` — range fades pull only 0.5×deep | | +2.3 |
-| `border_pass=1` — B-tier promotion (ER≥0.35 + room, 6-pt band) | adds 18 trades, +5.9R net | +5.9 |
+| `border_pass=6` — B-tier promotion (ER≥0.35 + room, 6-pt band) | adds 18 trades, +5.9R net | +5.9 |
+| `s_gb=3.0` — shorts lock +3R profit after TP1 | monotone to 3.0; 4.0 degrades | +3.0 |
 
 ## Rejected this session (all measured)
 
@@ -73,9 +74,12 @@ Two candidate B mechanics measured:
 1. Naive gate−4 band (= baseScoreGate 70): 104t / 48.1% / +105.7R / PF 2.9 —
    marginal trades ≈ breakeven, dilutes quality.
 2. **Border-pass (adopted)**: score within 6 of gate + ER≥0.35 + room OK +
-   not chop → promoted. **68t / 60.3% / +1.73 avgR / +117.8R / PF 5.34** —
-   +5.9R over A-only AND +12.1R over naive B. The ER≥0.35 condition picks
-   borderline setups in efficient tape and skips the coin-flip ones.
+   not chop → promoted. **68t / 61.8% / +1.78 avgR / +120.8R / PF 5.46**
+   (with s_gb 3.0) — +5.9R over A-only AND +12.1R over naive B. The ER≥0.35
+   condition picks borderline setups in efficient tape and skips the coin-flip
+   ones. Band width swept 3/4/6/8/10 → 6 optimal; ER swept 0.30/0.35/0.42 →
+   0.35 keeps combined WR ≥60% (0.30 gives +4R at 56.6% WR — rejected on the
+   owner's 60% floor).
 
 In the Pine, promoted B signals render as smaller dimmed `B` labels with their
 own alerts (`V18 LONG (B)`); A never preempts (A fires at full score outright).
