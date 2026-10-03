@@ -52,3 +52,17 @@ rg_no_sweep guard rejected (cuts winners too).
 
 ~46 signals over ~6y across ~280 cells — still a sniper. WR dipped 87→74% as
 trade count grew; per-trade quality (avgR +2.44) and PF (~10) stayed strong.
+
+## B-tier (added later — frequency tier)
+
+Same confluence, score in the 4-pt band below the A gate — i.e. `baseScoreGate=70`
+on the identical v18 config:
+
+| tier | trades | WR | avgR | sumR | PF |
+|---|---|---|---|---|---|
+| A only (sniper) | 48 | 70.8% | +2.29 | +110.0 | 8.5 |
+| A+B combined | 104 | 48.1% | +1.02 | +105.7 | 2.9 |
+
+Marginal B trades ≈ breakeven-to-slightly-negative net. They exist for frequency
+and for traders who accept ~48% WR at +1.0 avgR. A-tier quality is preserved
+unconditionally — B never preempts A (A requires score ≥ gate outright).

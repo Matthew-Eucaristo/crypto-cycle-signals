@@ -55,7 +55,16 @@ Earlier config on the smaller 68-coin universe: 31 trades, 87% WR, +53.6R, PF 13
    - Red zone = entry→SL · Green zone = entry→TP
    - Take 40% at TP1, trail the rest
 4. Historical signals stay on the chart with their result (`+3.76R · 107b` labels) — scroll back to validate. Note: free TradingView loads ~5000 bars, so deep-history signals may be off-screen.
-5. Set alerts on `V17 LONG` / `V17 SHORT` — you want the ping, not the chart-watching.
+5. Set alerts on `V18 LONG` / `V18 SHORT` — you want the ping, not the chart-watching.
+
+### Two confidence tiers
+
+- **A-tier** — the sniper signals above (~71% hist WR). Full-size label.
+- **B-tier** — same confluence, score in the 4-pt band just under the A gate. ~2× more frequent, measured ~48% WR / +1.0 avgR. Smaller dimmed label tagged `B`, own alerts (`V18 LONG (B)` etc). Toggle: *B-tier signals* in settings (default ON). Honest: the marginal B trades roughly break even on net — they're for frequency, not accuracy.
+
+### Alerts
+
+`V18 LONG/SHORT` (A-tier), `V18 LONG/SHORT (B)` (B-tier), `V18 FILLED` (limit order filled), `V18 TP1`, `V18 TP2`, `V18 TP3`, `V18 EXIT` (any close), `V18 DIR OFF` (self-learned direction shutdown).
 
 ### Useful settings
 
@@ -63,6 +72,7 @@ Earlier config on the smaller 68-coin universe: 31 trades, 87% WR, +53.6R, PF 13
 - **Range ADX ceiling** 18: ultra-quality preset (81% WR, PF ~9)
 - **Range directions**: Long only (default, measured best) / Both / Short only
 - **BTC anchor**: Cycle+Trend (default) / Trend only — the 4-year-cycle doctrine is built in
+- **B-tier signals**: off = sniper-only view
 
 ## What's on the chart
 

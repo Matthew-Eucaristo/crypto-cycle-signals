@@ -127,6 +127,7 @@ float lTpM = input.float(1.2, "Long TP multiplier", minval=0.5, maxval=3.0, step
 float sTrailM = input.float(0.05, "Short trail multiplier", minval=0.05, maxval=2.0, step=0.05, group=G_ADV, active=showAdv, display=display.none)
 float lGb = input.float(1.0, "Long post-TP1 lock (R)", minval=0.0, maxval=3.0, step=0.1, group=G_ADV, active=showAdv, display=display.none)
 float vlFloor = input.float(30.0, "Min volume rank", minval=0.0, maxval=60.0, step=5.0, group=G_ADV, active=showAdv, display=display.none)
+bool showB = input.bool(true, "B-tier signals (gate−4, ~48% hist WR)", tooltip="Show lower-confidence signals: score within 4 pts under the A-tier gate. Lab/sim measured ~48% WR, +1.0 avgR — real but weaker edge than A-tier (~71%).", group=G_ADV, active=showAdv, display=display.none)
 bool learnTargets = input.bool(false, "Adaptive TP (learned shrink)", tooltip="OFF = fixed targets (measured +14R better on the strict config). ON = shrink targets toward learned MFE quantiles.", group=G_ADV, active=showAdv, display=display.none)
 bool rgMode = input.bool(true, "Range-fade module (1h+)", tooltip="Mean-reversion fades in chop regimes (ADX<20, ER<0.15): fade >=2.2-ATR deviations back to EMA50. Auto-off below 1h — measured net loss on 15m.", group=G_ADV, active=showAdv, display=display.none)
 float rgExt = input.float(2.6, "Range fade extension (ATR)", minval=1.0, maxval=4.0, step=0.1, group=G_ADV, active=showAdv, display=display.none)
@@ -840,7 +841,12 @@ if rgMode and chartSec >= 3600 and barstate.isconfirmed and not tradeActive and 
 bool pendFree = pendDir == 0 or pendRange
 bool longSignal = (barstate.isconfirmed and not tradeActive and pendFree and cooldownOK and dirLongOK and longRaw and longScore >= adaptiveGate and longRoomOK and (not shortRaw or longScore >= shortScore)) or (rgMode and rangeLong)
 bool shortSignal = ((barstate.isconfirmed and not tradeActive and pendFree and cooldownOK and dirShortOK and shortRaw and shortScore >= adaptiveGate and shortRoomOK) or (rgMode and rangeShort)) and not longSignal
-if longSignal or shortSignal
+// B-tier: same confluence, score in the 4-pt band under the A gate (measured ~48% WR — real but weaker)
+bool bLong = showB and barstate.isconfirmed and not tradeActive and pendFree and cooldownOK and dirLongOK and longRaw and not longSignal and longScore >= adaptiveGate - 4.0 and longRoomOK and (not shortRaw or longScore >= shortScore)
+bool bShort = showB and barstate.isconfirmed and not tradeActive and pendFree and cooldownOK and dirShortOK and shortRaw and not bLong and not longSignal and not shortSignal and shortScore >= adaptiveGate - 4.0 and shortRoomOK
+bool longSignalAny = longSignal or bLong
+bool shortSignalAny = shortSignal or bShort
+if longSignalAny or shortSignalAny
     lastSignalBar := bar_index
 
 // WHY / WAIT
@@ -926,7 +932,7 @@ var int pendExp = na
 float slip = slipBps / 10000.0
 float costFrac = costBps / 10000.0
 
-if longSignal
+if longSignalAny
     bool isRg = rangeLong
     float rgRisk = rgStopATR * atr
     float rgT1 = f_clamp(math.abs(ema50 - close) / math.max(rgRisk, syminfo.mintick) * 1.5, 0.30, 2.20)
@@ -945,12 +951,12 @@ if longSignal
     pendSigBar := bar_index
     pendLimitPx := pullEntryATR > 0.0 ? close - pullEntryATR * atr * (isRg ? 0.5 : 1.0) : na
     pendExp := pullEntryATR > 0.0 ? bar_index + pullWait : bar_index + 1
-    label.new(bar_index, close, "\u25B2 " + (rangeLong ? "RNG LONG " : longVol ? "LONG SQ " : "LONG ") + str.tostring(rangeLong ? 78 : longScore, "#") + " " + f_conf_word(longScore, adaptiveGate) + "\nTP " + str.tostring(longTP2p, format.mintick) + " · SL " + str.tostring(longStopPx, format.mintick) + "\n" + str.tostring((longTP2p - close) / math.max(longRisk, syminfo.mintick), "#.#") + "R · ≤" + str.tostring(validBars) + "b", yloc=yloc.belowbar, style=label.style_label_up, color=color.new(C_LONG, longVol ? 0 : 12), textcolor=color.white, size=size.normal, force_overlay=true)
+    label.new(bar_index, close, "\u25B2 " + (bLong ? "B " : "") + (rangeLong ? "RNG LONG " : longVol ? "LONG SQ " : "LONG ") + str.tostring(rangeLong ? 78 : longScore, "#") + " " + f_conf_word(longScore, adaptiveGate) + "\nTP " + str.tostring(longTP2p, format.mintick) + " · SL " + str.tostring(longStopPx, format.mintick) + "\n" + str.tostring((longTP2p - close) / math.max(longRisk, syminfo.mintick), "#.#") + "R · ≤" + str.tostring(validBars) + "b", yloc=yloc.belowbar, style=label.style_label_up, color=color.new(C_LONG, bLong ? 55 : longVol ? 0 : 12), textcolor=color.white, size=bLong ? size.small : size.normal, force_overlay=true)
     float sgRef = pullEntryATR > 0.0 ? nz(pendLimitPx, close) : close
     box.new(bar_index, pendTP1px, bar_index + int(math.min(validBars, 24)), sgRef, xloc=xloc.bar_index, bgcolor=color.new(C_LONG, 88), border_color=color.new(C_LONG, 40), force_overlay=true)
     box.new(bar_index, sgRef, bar_index + int(math.min(validBars, 24)), pendSL, xloc=xloc.bar_index, bgcolor=color.new(C_SHORT, 88), border_color=color.new(C_SHORT, 40), force_overlay=true)
 
-if shortSignal
+if shortSignalAny
     bool isRg = rangeShort
     float rgRisk = rgStopATR * atr
     float rgT1 = f_clamp(math.abs(ema50 - close) / math.max(rgRisk, syminfo.mintick) * 1.5, 0.30, 2.20)
@@ -969,7 +975,7 @@ if shortSignal
     pendSigBar := bar_index
     pendLimitPx := pullEntryATR > 0.0 ? close + pullEntryATR * atr : na
     pendExp := pullEntryATR > 0.0 ? bar_index + pullWait : bar_index + 1
-    label.new(bar_index, close, "\u25BC " + (rangeShort ? "RNG SHORT " : shortVol ? "SHORT SQ " : "SHORT ") + str.tostring(rangeShort ? 78 : shortScore, "#") + " " + f_conf_word(shortScore, adaptiveGate) + "\nTP " + str.tostring(shortTP2p, format.mintick) + " · SL " + str.tostring(shortStopPx, format.mintick) + "\n" + str.tostring((close - shortTP2p) / math.max(shortRisk, syminfo.mintick), "#.#") + "R · ≤" + str.tostring(validBars) + "b", yloc=yloc.abovebar, style=label.style_label_down, color=color.new(C_SHORT, shortVol ? 0 : 12), textcolor=color.white, size=size.normal, force_overlay=true)
+    label.new(bar_index, close, "\u25BC " + (bShort ? "B " : "") + (rangeShort ? "RNG SHORT " : shortVol ? "SHORT SQ " : "SHORT ") + str.tostring(rangeShort ? 78 : shortScore, "#") + " " + f_conf_word(shortScore, adaptiveGate) + "\nTP " + str.tostring(shortTP2p, format.mintick) + " · SL " + str.tostring(shortStopPx, format.mintick) + "\n" + str.tostring((close - shortTP2p) / math.max(shortRisk, syminfo.mintick), "#.#") + "R · ≤" + str.tostring(validBars) + "b", yloc=yloc.abovebar, style=label.style_label_down, color=color.new(C_SHORT, bShort ? 55 : shortVol ? 0 : 12), textcolor=color.white, size=bShort ? size.small : size.normal, force_overlay=true)
     float sgRef = pullEntryATR > 0.0 ? nz(pendLimitPx, close) : close
     box.new(bar_index, sgRef, bar_index + int(math.min(validBars, 24)), pendSL, xloc=xloc.bar_index, bgcolor=color.new(C_SHORT, 88), border_color=color.new(C_SHORT, 40), force_overlay=true)
     box.new(bar_index, pendTP1px, bar_index + int(math.min(validBars, 24)), sgRef, xloc=xloc.bar_index, bgcolor=color.new(C_LONG, 88), border_color=color.new(C_LONG, 40), force_overlay=true)
@@ -1349,8 +1355,8 @@ hline(20, "Long edge", color=color.new(C_LONG, 55), linestyle=hline.style_dotted
 hline(-20, "Short edge", color=color.new(C_SHORT, 55), linestyle=hline.style_dotted)
 
 // HUD
-string decision = longSignal ? "LONG" : shortSignal ? "SHORT" : waitReason
-color decisionBg = longSignal or (tradeActive and tradeDir == 1) ? color.new(C_LONG, 0) : shortSignal or (tradeActive and tradeDir == -1) ? color.new(C_SHORT, 0) : str.contains(waitReason, "CHOP") or str.contains(waitReason, "NO ") or str.contains(waitReason, "LEARNED") ? color.new(C_WARN, 5) : color.new(#1e293b, 0)
+string decision = longSignal ? "LONG" : shortSignal ? "SHORT" : bLong ? "LONG (B)" : bShort ? "SHORT (B)" : waitReason
+color decisionBg = longSignalAny or (tradeActive and tradeDir == 1) ? color.new(C_LONG, 0) : shortSignalAny or (tradeActive and tradeDir == -1) ? color.new(C_SHORT, 0) : str.contains(waitReason, "CHOP") or str.contains(waitReason, "NO ") or str.contains(waitReason, "LEARNED") ? color.new(C_WARN, 5) : color.new(#1e293b, 0)
 string confNow = tradeActive ? f_conf_word(tradeScore, adaptiveGate) + " " + str.tostring(tradeScore, "#") : "L" + str.tostring(longScore, "#") + "  S" + str.tostring(shortScore, "#")
 string whyNow = tradeActive ? tradeWhy : longScore >= shortScore ? longWhy : shortWhy
 string planTxt = (tradeActive ? tradeStatus : pendDir != 0 ? (pendRange ? "RNG LIMIT" : pullEntryATR > 0.0 ? "LIMIT" : "PENDING") : (planDirNow == 1 ? "LONG PLAN" : "SHORT PLAN")) + "  " + str.tostring(planRNow, "#.#") + "R  IN " + str.tostring(planEntryPx, format.mintick) + "  SL " + str.tostring(planSLPx, format.mintick) + "  TP " + str.tostring(planTP2Px, format.mintick) + "  valid ~" + str.tostring(tradeActive and not na(tradeValid) ? tradeValid : validBars) + "b"
@@ -1394,7 +1400,7 @@ if selfN >= 8
             s2 += v
     h1Avg := s1 / half
     h2Avg := s2 / (selfN - half)
-int sigCount = int(ta.cum((longSignal or shortSignal) ? 1.0 : 0.0))
+int sigCount = int(ta.cum((longSignalAny or shortSignalAny) ? 1.0 : 0.0))
 string learnTxt = (dirLongLearnedOff ? "L-OFF " : "") + (dirShortLearnedOff ? "S-OFF " : "") + (na(learnedStopATR) ? "" : "SL " + str.tostring(adaptiveStopATR, "#.##") + "A ") + (selfN >= 10 ? "TP learned" : "TP prior")
 string histTxt = str.tostring(sigCount) + " sig · " + str.tostring(selfN) + " closed" + (selfN == 0 ? " — none yet on this chart" : " · TP1 " + str.tostring(tp1Rate, "#") + "% · avg " + (avgR >= 0.0 ? "+" : "") + str.tostring(avgR, "#.##") + "R · L" + str.tostring(nL) + "/" + str.tostring(pfL, "#.#") + " S" + str.tostring(nS) + "/" + str.tostring(pfS, "#.#"))
 
@@ -1424,5 +1430,10 @@ alertcondition(longSignal, "V18 LONG", "Signals V18 LONG. Confirmed close. Entry
 alertcondition(shortSignal, "V18 SHORT", "Signals V18 SHORT. Confirmed close. Entry = LIMIT order at the LIMIT line (pullback), valid ~5 bars — do not chase. Read why/score before acting.")
 alertcondition(not na(tp1Bar) and tp1Bar == bar_index, "V18 TP1", "Signals V18 TP1.")
 alertcondition(not na(tp2Bar) and tp2Bar == bar_index, "V18 TP2", "Signals V18 TP2 / runner.")
+alertcondition(bLong, "V18 LONG (B)", "Signals V18 LONG B-tier — lower confidence band (~48% hist WR). Entry = LIMIT at LIMIT line.")
+alertcondition(bShort, "V18 SHORT (B)", "Signals V18 SHORT B-tier — lower confidence band (~48% hist WR). Entry = LIMIT at LIMIT line.")
+alertcondition(tradeActive and not tradeActive[1], "V18 FILLED", "Signals V18: pending limit filled — trade is now ACTIVE.")
+alertcondition(not tradeActive and tradeActive[1] and str.contains(tradeStatus, "TP3"), "V18 TP3", "Signals V18 TP3 hit — trade closed at final target.")
+alertcondition(not tradeActive and tradeActive[1], "V18 EXIT", "Signals V18: trade closed (any reason).")
 alertcondition((dirLongLearnedOff and not dirLongLearnedOff[1]) or (dirShortLearnedOff and not dirShortLearnedOff[1]), "V18 DIR OFF", "Signals V18: a direction was learned off by this chart's closed sim trades.")
 
