@@ -46,12 +46,19 @@ rg_dirs 0/2 (range shorts still lose); rg_ext 2.2/3.0; rg_adx 18/22; rg_cloc 0.8
 volGatePb 20/45/60; deepMax 1.5/2.5; vl_hi 80/90; vl_lo 35–50; vl_lo_s 20–50;
 fund_cap 0.0003/4/6/8 (non-binding now); stopATR 2.4/2.5/2.7/3.0.
 
-## Universe note
+## Universe note / holdout
 
-Expanded 68→95+ Binance perps (incl. 2024-2025 listings). New-symbol trades so
-far: 10 trades +22.5R — the config generalizes to symbols it was NOT tuned on
-(good anti-overfit signal). Range-leg losers GMT/HIGH persist — investigated;
-rg_no_sweep guard rejected (cuts winners too).
+Expanded 68→101 Binance perps (incl. 2024-2025 listings). Splitting the final
+v18 run by which side of the expansion each symbol sits on:
+
+| cohort | trades | WR | sumR |
+|---|---|---|---|
+| tuned-68 (original universe) | 37 | 59% | +55.8 |
+| new-33 (never tuned on) | 31 | 61% | +62.1 |
+
+The config earns MORE than half its R on symbols it was never fitted to — the
+strongest anti-overfit evidence in the run. Range-leg losers GMT/HIGH persist —
+investigated; rg_no_sweep guard rejected (cuts winners too).
 
 ## Live caveat (unchanged)
 
