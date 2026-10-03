@@ -9,9 +9,9 @@ Honest sim (next-open/limit fills, slippage+fees), Binance USDT-M perps.
 | v17 (baseline) | 68 syms × 3 TF | 31 | 87.1% | +1.73 | +53.6 | 13.7 |
 | BASE17 on final universe | 101 syms × 3 TF | 44 | 77.3% | +1.32 | +58.0 | 6.5 |
 | v18 A-tier only | 101 syms × 3 TF | 50 | 68.0% | +2.24 | +111.9 | 7.7 |
-| **v18 final (A+B tiers)** | **101 syms × 3 TF** | **68** | **61.8%** | **+1.78** | **+120.8** | **5.5** |
+| **v18 final (A+B tiers)** | **101 syms × 3 TF** | **70** | **64.3%** | **+1.90** | **+133.1** | **6.24** |
 
-Apples-to-apples on the final 303-cell universe: v18 makes +120.8R vs BASE17's
+Apples-to-apples on the final 303-cell universe: v18 makes +133.1R vs BASE17's
 +58.0R — ~2× total R, with ~50% more trades than the pure-sniper config.
 
 Later-session additions: `stopATR 2.6→2.5` (+1.9R), `border_pass` 6-pt band
@@ -74,7 +74,7 @@ Two candidate B mechanics measured:
 1. Naive gate−4 band (= baseScoreGate 70): 104t / 48.1% / +105.7R / PF 2.9 —
    marginal trades ≈ breakeven, dilutes quality.
 2. **Border-pass (adopted)**: score within 6 of gate + ER≥0.35 + room OK +
-   not chop → promoted. **68t / 61.8% / +1.78 avgR / +120.8R / PF 5.46**
+   not chop → promoted. Phase-3 adds: minBodyFraction 0.20, volRank floor 35, per-TF hold ladder (15m/1h=128b, 4h=192b). **70t / 64.3% / +1.90 avgR / +133.1R / PF 6.24**
    (with s_gb 3.0) — +5.9R over A-only AND +12.1R over naive B. The ER≥0.35
    condition picks borderline setups in efficient tape and skips the coin-flip
    ones. Band width swept 3/4/6/8/10 → 6 optimal; ER swept 0.30/0.35/0.42 →

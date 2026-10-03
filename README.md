@@ -29,7 +29,7 @@ Trend signals preempt pending range orders, so the two legs never fight.
 | Trades | 68 |
 | Win rate | **62%** |
 | Avg | +1.78R |
-| Net | +120.8R |
+| Net | +133.1R |
 | Profit factor | 5.5 |
 | vs previous version | +58.0R on the same universe |
 

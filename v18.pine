@@ -6,11 +6,12 @@ indicator("Adaptive Signals V18 — Self-Calibrating Quant", shorttitle="Signals
 // percentile windows + HTF ladder scale to the chart timeframe. Research-only.
 // Default action is WAIT.
 //
-// V18 — measured wins over V17 (+58.0R → +120.8R on same 101-perp universe):
+// V18 — measured wins over V17 (+58.0R → +133.1R on same 101-perp universe):
 //   short TP ×3, tight short trail ×0.05, longer pullback validity 15b,
-//   volRank≥30 entry floor, long post-TP1 +1R lock, no TP1 partial,
+//   volRank≥35 entry floor, long post-TP1 +1R lock, no TP1 partial,
 //   range TP ×1.5, range pull 0.5×, tighter stop 2.5A, border-pass B-tier
-//   (score within 6 of gate + ER≥0.35 + room → promoted), short +3R profit lock.
+//   (score within 6 of gate + ER≥0.35 + room → promoted), short +3R profit lock,
+//   looser body floor 0.20, per-TF hold ladder (15m/1h 128b, 4h 192b).
 // V17 — range-fade module: in chop (ADX 16-20, ER<0.15) fade >=2.6-ATR capitulation extensions back to EMA50.
 //       Longs-only default (short fades measured ~breakeven; dip fades +1.78 avgR). Trend signals preempt pending fades.
 //       Backtest (68 USDT-M perps x 15m/1h/4h, 2020-2026, honest sim): 31 trades, 87% WR, +1.73 avgR, +53.6R, PF 13.7.
@@ -100,7 +101,7 @@ bool allowShort = input.bool(true, "Allow shorts", group=G_ADV, active=showAdv, 
 bool useDirLearn = input.bool(true, "Direction self-veto", tooltip="Let the chart's own closed sim trades disable a losing side.", group=G_ADV, active=showAdv, display=display.none)
 float minVolumeRank = input.float(50.0, "Min volume percentile", minval=20, maxval=90, step=5, group=G_ADV, active=showAdv, display=display.none)
 float minSlopeATR = input.float(0.06, "Min EMA25 slope / ATR", minval=0.01, maxval=0.20, step=0.01, group=G_ADV, active=showAdv, display=display.none)
-float minBodyFraction = input.float(0.25, "Min body fraction", minval=0.10, maxval=0.70, step=0.05, group=G_ADV, active=showAdv, display=display.none)
+float minBodyFraction = input.float(0.20, "Min body fraction", minval=0.10, maxval=0.70, step=0.05, group=G_ADV, active=showAdv, display=display.none)
 float minCloseLocation = input.float(0.62, "Long close location", minval=0.50, maxval=0.90, step=0.02, group=G_ADV, active=showAdv, display=display.none)
 float minAdx = input.float(18.0, "Min ADX", minval=10, maxval=40, step=1, group=G_ADV, active=showAdv, display=display.none)
 float minER = input.float(0.16, "Min efficiency", minval=0.05, maxval=0.50, step=0.01, group=G_ADV, active=showAdv, display=display.none)
@@ -117,7 +118,7 @@ string tradeProfile = input.string("Balanced", "Trade profile", options=["Balanc
 float stopATR = input.float(2.40, "Stop ATR", minval=0.8, maxval=3.0, step=0.05, group=G_ADV, active=showAdv, display=display.none)
 float targetR = input.float(3.00, "Target R (TP2)", minval=1.0, maxval=4.5, step=0.10, group=G_ADV, active=showAdv, display=display.none)
 float tp1Base = input.float(1.50, "TP1 base (R)", minval=0.4, maxval=2.4, step=0.10, group=G_ADV, active=showAdv, display=display.none)
-int maxHoldBars = input.int(128, "Max hold (bars)", minval=8, maxval=256, group=G_ADV, active=showAdv, display=display.none)
+int maxHoldBars = input.int(160, "Max hold (bars)", minval=8, maxval=256, group=G_ADV, active=showAdv, display=display.none)
 int pbWin = input.int(6, "Pullback window (bars)", tooltip="Resume family: EMA25 must have been tapped within this many bars.", minval=2, maxval=12, group=G_ADV, active=showAdv, display=display.none)
 float pbDeepMax = input.float(1.5, "Pullback max depth (ATR)", minval=0.4, maxval=4.0, step=0.1, group=G_ADV, active=showAdv, display=display.none)
 float roomMinR = input.float(1.2, "Min room to HTF wall (R)", minval=0.5, maxval=3.0, step=0.05, tooltip="Biggest measured win: require >=1.2R of open space to the HTF liquidity wall before entering.", group=G_ADV, active=showAdv, display=display.none)
@@ -126,9 +127,9 @@ int pullWait = input.int(15, "Pullback order validity (bars)", minval=1, maxval=
 float sTpM = input.float(3.0, "Short TP multiplier", minval=0.5, maxval=5.0, step=0.1, group=G_ADV, active=showAdv, display=display.none)
 float lTpM = input.float(1.2, "Long TP multiplier", minval=0.5, maxval=3.0, step=0.1, group=G_ADV, active=showAdv, display=display.none)
 float sTrailM = input.float(0.05, "Short trail multiplier", minval=0.05, maxval=2.0, step=0.05, group=G_ADV, active=showAdv, display=display.none)
-float lGb = input.float(1.0, "Long post-TP1 lock (R)", minval=0.0, maxval=3.0, step=0.1, group=G_ADV, active=showAdv, display=display.none)
+float lGb = input.float(1.25, "Long post-TP1 lock (R)", minval=0.0, maxval=3.0, step=0.1, group=G_ADV, active=showAdv, display=display.none)
 float sGb = input.float(3.0, "Short post-TP1 lock (R)", minval=0.0, maxval=3.0, step=0.1, group=G_ADV, active=showAdv, display=display.none)
-float vlFloor = input.float(30.0, "Min volume rank", minval=0.0, maxval=60.0, step=5.0, group=G_ADV, active=showAdv, display=display.none)
+float vlFloor = input.float(35.0, "Min volume rank", minval=0.0, maxval=60.0, step=5.0, group=G_ADV, active=showAdv, display=display.none)
 bool showB = input.bool(true, "B-tier signals (border pass)", tooltip="Borderline setups promoted when ER>=0.35 + room: score within 6 pts under the A gate in efficient tape. Lab/sim measured +5.9R net, ~60% WR combined.", group=G_ADV, active=showAdv, display=display.none)
 bool learnTargets = input.bool(false, "Adaptive TP (learned shrink)", tooltip="OFF = fixed targets (measured +14R better on the strict config). ON = shrink targets toward learned MFE quantiles.", group=G_ADV, active=showAdv, display=display.none)
 bool rgMode = input.bool(true, "Range-fade module (1h+)", tooltip="Mean-reversion fades in chop regimes (ADX<20, ER<0.15): fade >=2.2-ATR deviations back to EMA50. Auto-off below 1h — measured net loss on 15m.", group=G_ADV, active=showAdv, display=display.none)
@@ -152,7 +153,7 @@ bool showStructure = input.bool(true, "Show SMC structure", group=G_ADV, active=
 // Profile presets — measured on the 81-cell universe (27 symbols x 3 TFs).
 float profTp1Frac = tradeProfile == "High WR" ? 0.50 : tradeProfile == "Runner" ? 0.0 : 0.10
 float effTargetR = tradeProfile == "Runner" ? math.max(targetR, 3.5) : targetR
-int effHoldBars = tradeProfile == "Runner" ? math.max(maxHoldBars, 192) : maxHoldBars
+int effHoldBars = tradeProfile == "Runner" ? math.max(maxHoldBars, 192) : (chartSec >= 14400 ? math.max(maxHoldBars, 192) : math.min(maxHoldBars, 128))
 
 color C_LONG = #10b981
 color C_SHORT = #f43f5e
@@ -772,7 +773,7 @@ bool dirLongOK = allowLong and not dirLongLearnedOff
 bool dirShortOK = allowShort and not dirShortLearnedOff
 
 // RISK / TARGETS
-float effStopATR = chartSec >= 3600 ? math.max(stopATR, 2.5) : stopATR
+float effStopATR = chartSec >= 14400 ? math.max(stopATR, 3.0) : chartSec >= 3600 ? math.max(stopATR, 2.5) : stopATR
 float baseStopATR = effStopATR + 0.20 * (volRank / 100.0)
 float adaptiveStopATR = f_blend(baseStopATR, learnedStopATR, stopW)
 float longStopPx = close - atr * adaptiveStopATR
