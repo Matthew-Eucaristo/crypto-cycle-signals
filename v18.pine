@@ -127,7 +127,7 @@ float lTpM = input.float(1.2, "Long TP multiplier", minval=0.5, maxval=3.0, step
 float sTrailM = input.float(0.05, "Short trail multiplier", minval=0.05, maxval=2.0, step=0.05, group=G_ADV, active=showAdv, display=display.none)
 float lGb = input.float(1.0, "Long post-TP1 lock (R)", minval=0.0, maxval=3.0, step=0.1, group=G_ADV, active=showAdv, display=display.none)
 float vlFloor = input.float(30.0, "Min volume rank", minval=0.0, maxval=60.0, step=5.0, group=G_ADV, active=showAdv, display=display.none)
-bool showB = input.bool(true, "B-tier signals (gate−4, ~48% hist WR)", tooltip="Show lower-confidence signals: score within 4 pts under the A-tier gate. Lab/sim measured ~48% WR, +1.0 avgR — real but weaker edge than A-tier (~71%).", group=G_ADV, active=showAdv, display=display.none)
+bool showB = input.bool(true, "B-tier signals (border pass)", tooltip="Borderline setups promoted when ER>=0.35 + room: score within 6 pts under the A gate in efficient tape. Lab/sim measured +5.9R net, ~60% WR combined.", group=G_ADV, active=showAdv, display=display.none)
 bool learnTargets = input.bool(false, "Adaptive TP (learned shrink)", tooltip="OFF = fixed targets (measured +14R better on the strict config). ON = shrink targets toward learned MFE quantiles.", group=G_ADV, active=showAdv, display=display.none)
 bool rgMode = input.bool(true, "Range-fade module (1h+)", tooltip="Mean-reversion fades in chop regimes (ADX<20, ER<0.15): fade >=2.2-ATR deviations back to EMA50. Auto-off below 1h — measured net loss on 15m.", group=G_ADV, active=showAdv, display=display.none)
 float rgExt = input.float(2.6, "Range fade extension (ATR)", minval=1.0, maxval=4.0, step=0.1, group=G_ADV, active=showAdv, display=display.none)
@@ -770,7 +770,7 @@ bool dirLongOK = allowLong and not dirLongLearnedOff
 bool dirShortOK = allowShort and not dirShortLearnedOff
 
 // RISK / TARGETS
-float effStopATR = chartSec >= 3600 ? math.max(stopATR, 2.6) : stopATR
+float effStopATR = chartSec >= 3600 ? math.max(stopATR, 2.5) : stopATR
 float baseStopATR = effStopATR + 0.20 * (volRank / 100.0)
 float adaptiveStopATR = f_blend(baseStopATR, learnedStopATR, stopW)
 float longStopPx = close - atr * adaptiveStopATR
@@ -842,8 +842,8 @@ bool pendFree = pendDir == 0 or pendRange
 bool longSignal = (barstate.isconfirmed and not tradeActive and pendFree and cooldownOK and dirLongOK and longRaw and longScore >= adaptiveGate and longRoomOK and (not shortRaw or longScore >= shortScore)) or (rgMode and rangeLong)
 bool shortSignal = ((barstate.isconfirmed and not tradeActive and pendFree and cooldownOK and dirShortOK and shortRaw and shortScore >= adaptiveGate and shortRoomOK) or (rgMode and rangeShort)) and not longSignal
 // B-tier: same confluence, score in the 4-pt band under the A gate (measured ~48% WR — real but weaker)
-bool bLong = showB and barstate.isconfirmed and not tradeActive and pendFree and cooldownOK and dirLongOK and longRaw and not longSignal and longScore >= adaptiveGate - 4.0 and longRoomOK and (not shortRaw or longScore >= shortScore)
-bool bShort = showB and barstate.isconfirmed and not tradeActive and pendFree and cooldownOK and dirShortOK and shortRaw and not bLong and not longSignal and not shortSignal and shortScore >= adaptiveGate - 4.0 and shortRoomOK
+bool bLong = showB and barstate.isconfirmed and not tradeActive and pendFree and cooldownOK and dirLongOK and longRaw and not longSignal and longScore >= adaptiveGate - 6.0 and longScore < adaptiveGate and longRoomOK and er32 >= 0.35 and not chopVeto and (not shortRaw or longScore >= shortScore)
+bool bShort = showB and barstate.isconfirmed and not tradeActive and pendFree and cooldownOK and dirShortOK and shortRaw and not bLong and not longSignal and not shortSignal and shortScore >= adaptiveGate - 6.0 and shortScore < adaptiveGate and shortRoomOK and er32 >= 0.35 and not chopVeto
 bool longSignalAny = longSignal or bLong
 bool shortSignalAny = shortSignal or bShort
 if longSignalAny or shortSignalAny

@@ -26,16 +26,16 @@ Trend signals preempt pending range orders, so the two legs never fight.
 
 | Metric | Value |
 |---|---|
-| Trades | 48 |
-| Win rate | **71%** |
-| Avg | +2.29R |
-| Net | +110.0R |
-| Profit factor | 8.5 |
+| Trades | 68 |
+| Win rate | **60%** |
+| Avg | +1.73R |
+| Net | +117.8R |
+| Profit factor | 5.3 |
 | vs previous version | +58.0R on the same universe |
 
 Earlier config on the smaller 68-coin universe: 31 trades, 87% WR, +53.6R, PF 13.7.
 
-**Frequency: this is a sniper.** ~48 signals across 6 years of data on 101 coins. It can sit quiet for weeks on one chart. That's the price of the edge.
+**Frequency: still selective.** ~68 signals across 6 years of data on 101 coins (A+B tiers). It can sit quiet for weeks on one chart. That's the price of the edge.
 
 ### Where it works / doesn't (measured)
 
@@ -53,14 +53,14 @@ Earlier config on the smaller 68-coin universe: 31 trades, 87% WR, +53.6R, PF 13
 3. When a label appears: **▲ LONG** / **▼ SHORT** (RNG = range fade)
    - White line = **LIMIT entry** — post a limit order there, valid ~5 bars, don't chase
    - Red zone = entry→SL · Green zone = entry→TP
-   - Take 40% at TP1, trail the rest
+   - No partial — runner math won in tests; trail to TP2/TP3
 4. Historical signals stay on the chart with their result (`+3.76R · 107b` labels) — scroll back to validate. Note: free TradingView loads ~5000 bars, so deep-history signals may be off-screen.
 5. Set alerts on `V18 LONG` / `V18 SHORT` — you want the ping, not the chart-watching.
 
 ### Two confidence tiers
 
-- **A-tier** — the sniper signals above (~71% hist WR). Full-size label.
-- **B-tier** — same confluence, score in the 4-pt band just under the A gate. ~2× more frequent, measured ~48% WR / +1.0 avgR. Smaller dimmed label tagged `B`, own alerts (`V18 LONG (B)` etc). Toggle: *B-tier signals* in settings (default ON). Honest: the marginal B trades roughly break even on net — they're for frequency, not accuracy.
+- **A-tier** — the sniper signals (~68% hist WR on the 50 A trades). Full-size label.
+- **B-tier (border pass)** — borderline setups whose score lands within 6 pts under the A gate get promoted when the tape is efficient (ER≥0.35) and there's room. ~40% more signals than A-only, +5.9R net measured on 101 perps. Smaller dimmed label tagged `B`, own alerts (`V18 LONG (B)` etc). Toggle: *B-tier signals* in settings (default ON).
 
 ### Alerts
 

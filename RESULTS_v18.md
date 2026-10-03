@@ -8,11 +8,15 @@ Honest sim (next-open/limit fills, slippage+fees), Binance USDT-M perps.
 |---|---|---|---|---|---|---|
 | v17 (baseline) | 68 syms × 3 TF | 31 | 87.1% | +1.73 | +53.6 | 13.7 |
 | BASE17 on final universe | 101 syms × 3 TF | 44 | 77.3% | +1.32 | +58.0 | 6.5 |
-| **v18 (this)** | **101 syms × 3 TF** | **48** | **70.8%** | **+2.29** | **+110.0** | **8.5** |
+| v18 A-tier only | 101 syms × 3 TF | 50 | 68.0% | +2.24 | +111.9 | 7.7 |
+| **v18 final (A+B tiers)** | **101 syms × 3 TF** | **68** | **60.3%** | **+1.73** | **+117.8** | **5.3** |
 
-Apples-to-apples on the final 303-cell universe: v18 makes +110.0R vs BASE17's
-+58.0R — nearly 2× total R. Per-trade quality nearly doubles (avgR +1.32→+2.29)
-at a WR cost of 77→71%.
+Apples-to-apples on the final 303-cell universe: v18 makes +117.8R vs BASE17's
++58.0R — ~2× total R, with ~50% more trades than the pure-sniper config.
+
+Later-session additions: `stopATR 2.6→2.5` (+1.9R) and `border_pass=1` —
+borderline scores within 6 pts of the gate promoted when ER≥0.35 + room OK
+(+5.9R, the engine-validated "B-tier").
 
 ## Adopted deltas (each measured; cumulative order)
 
@@ -27,8 +31,9 @@ at a WR cost of 77→71%.
 | `l_gb=1.0` — longs post-TP1 SL = entry+1R | retraces bank profit not BE | +1.0 |
 | `pull_wait=15` — limit order lives 15 bars | slower pullbacks fill | +3.3 |
 | `vl_lo=30` — volRank≥30 for trend entries | kills low-energy entries | +2.8 |
-| `stopATR=2.6` (≥1h; was 2.8) | more valid entries; WR 83→74 tradeoff | +8 |
+| `stopATR=2.6→2.5` (≥1h; was 2.8) | more valid entries at WR cost | +8→+9.9 |
 | `rg_pull_m=0.5` — range fades pull only 0.5×deep | | +2.3 |
+| `border_pass=1` — B-tier promotion (ER≥0.35 + room, 6-pt band) | adds 18 trades, +5.9R net | +5.9 |
 
 ## Rejected this session (all measured)
 
@@ -50,19 +55,20 @@ rg_no_sweep guard rejected (cuts winners too).
 
 ## Live caveat (unchanged)
 
-~46 signals over ~6y across ~280 cells — still a sniper. WR dipped 87→74% as
-trade count grew; per-trade quality (avgR +2.44) and PF (~10) stayed strong.
+68 signals over ~6y across ~300 cells — still selective, though the B-tier
+nearly doubled frequency vs the pure sniper. WR is lower than v17's 87% as
+trade count grew; net R and per-trade quality are what mattered to the owner.
 
-## B-tier (added later — frequency tier)
+## B-tier (border-pass — frequency tier)
 
-Same confluence, score in the 4-pt band below the A gate — i.e. `baseScoreGate=70`
-on the identical v18 config:
+Two candidate B mechanics measured:
 
-| tier | trades | WR | avgR | sumR | PF |
-|---|---|---|---|---|---|
-| A only (sniper) | 48 | 70.8% | +2.29 | +110.0 | 8.5 |
-| A+B combined | 104 | 48.1% | +1.02 | +105.7 | 2.9 |
+1. Naive gate−4 band (= baseScoreGate 70): 104t / 48.1% / +105.7R / PF 2.9 —
+   marginal trades ≈ breakeven, dilutes quality.
+2. **Border-pass (adopted)**: score within 6 of gate + ER≥0.35 + room OK +
+   not chop → promoted. **68t / 60.3% / +1.73 avgR / +117.8R / PF 5.34** —
+   +5.9R over A-only AND +12.1R over naive B. The ER≥0.35 condition picks
+   borderline setups in efficient tape and skips the coin-flip ones.
 
-Marginal B trades ≈ breakeven-to-slightly-negative net. They exist for frequency
-and for traders who accept ~48% WR at +1.0 avgR. A-tier quality is preserved
-unconditionally — B never preempts A (A requires score ≥ gate outright).
+In the Pine, promoted B signals render as smaller dimmed `B` labels with their
+own alerts (`V18 LONG (B)`); A never preempts (A fires at full score outright).
