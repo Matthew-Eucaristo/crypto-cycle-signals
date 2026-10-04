@@ -6,9 +6,9 @@ indicator("Adaptive Signals V18 — Self-Calibrating Quant", shorttitle="Signals
 // percentile windows + HTF ladder scale to the chart timeframe. Research-only.
 // Default action is WAIT.
 //
-// V18 — measured wins over V17 (+58.0R → +195.8R on expanded 107-perp universe):
-//   phase-4 adoptions (154t / 61.0% WR / PF 4.26): fill-bar candle filter
-//   (wide fill candles = momentum slicing the limit → reject; per-TF 0.8/0.875/1.5A),
+// V18 — measured wins over V17 (+58.0R → +196.9R on expanded 107-perp universe):
+//   phase-4 adoptions (153t / 61.4% WR / PF 4.34): fill-bar candle filter
+//   (wide fill candles = momentum slicing the limit → reject; per-TF 0.7/0.875/1.5A),
 //   pullback limit deepened 0.35→0.45A,
 //   exits re-fit on the widened pool: short TP ×3→×2.5, long TP ×1.2→×1.8,
 //   short trail 0.05→0.02, hold 128→256b (4h floor 288b),
@@ -785,7 +785,7 @@ bool dirShortOK = allowShort and not dirShortLearnedOff
 
 // RISK / TARGETS
 float effStopATR = chartSec >= 14400 ? math.max(stopATR, 3.0) : chartSec >= 3600 ? math.max(stopATR, 2.5) : stopATR
-float effFillCnd = fillCndMax <= 0.0 ? 0.0 : (chartSec >= 14400 ? math.max(fillCndMax, 1.5) : chartSec < 3600 ? math.min(fillCndMax, 0.8) : fillCndMax)
+float effFillCnd = fillCndMax <= 0.0 ? 0.0 : (chartSec >= 14400 ? math.max(fillCndMax, 1.5) : chartSec < 3600 ? math.min(fillCndMax, 0.7) : fillCndMax)
 float baseStopATR = effStopATR + 0.20 * (volRank / 100.0)
 float adaptiveStopATR = f_blend(baseStopATR, learnedStopATR, stopW)
 float longStopPx = close - atr * adaptiveStopATR
@@ -1452,10 +1452,10 @@ if barstate.islast
 
 alertcondition(longSignal, "V18 LONG", "Signals V18 LONG. Confirmed close. Entry = LIMIT order at the LIMIT line (pullback), valid ~5 bars — do not chase. Read why/score before acting.")
 alertcondition(shortSignal, "V18 SHORT", "Signals V18 SHORT. Confirmed close. Entry = LIMIT order at the LIMIT line (pullback), valid ~5 bars — do not chase. Read why/score before acting.")
-alertcondition(longSignal and confFlagsL >= 4, "V18 LONG ★★★", "Signals V18 LONG top-confidence (>=4 measured flags, ~86% hist WR). Entry = LIMIT at LIMIT line.")
-alertcondition(shortSignal and confFlagsS >= 4, "V18 SHORT ★★★", "Signals V18 SHORT top-confidence (>=4 measured flags, ~86% hist WR). Entry = LIMIT at LIMIT line.")
-alertcondition(longSignal and confFlagsL >= 2 and confFlagsL < 4, "V18 LONG ★★", "Signals V18 LONG high-confidence (2-3 measured flags, ~60% hist WR). Entry = LIMIT at LIMIT line.")
-alertcondition(shortSignal and confFlagsS >= 2 and confFlagsS < 4, "V18 SHORT ★★", "Signals V18 SHORT high-confidence (2-3 measured flags, ~60% hist WR). Entry = LIMIT at LIMIT line.")
+alertcondition(longSignal and confFlagsL >= 4, "V18 LONG ★★★", "Signals V18 LONG top-confidence (>=4 measured flags, ~73% hist WR). Entry = LIMIT at LIMIT line.")
+alertcondition(shortSignal and confFlagsS >= 4, "V18 SHORT ★★★", "Signals V18 SHORT top-confidence (>=4 measured flags, ~73% hist WR). Entry = LIMIT at LIMIT line.")
+alertcondition(longSignal and confFlagsL >= 2 and confFlagsL < 4, "V18 LONG ★★", "Signals V18 LONG high-confidence (2-3 measured flags, ~64% hist WR). Entry = LIMIT at LIMIT line.")
+alertcondition(shortSignal and confFlagsS >= 2 and confFlagsS < 4, "V18 SHORT ★★", "Signals V18 SHORT high-confidence (2-3 measured flags, ~64% hist WR). Entry = LIMIT at LIMIT line.")
 alertcondition(longSignal and confFlagsL <= 1, "V18 LONG ★", "Signals V18 LONG low-confidence (<=1 measured flag, ~55% hist WR). Size down or skip.")
 alertcondition(shortSignal and confFlagsS <= 1, "V18 SHORT ★", "Signals V18 SHORT low-confidence (<=1 measured flag, ~55% hist WR). Size down or skip.")
 alertcondition(not na(tp1Bar) and tp1Bar == bar_index, "V18 TP1", "Signals V18 TP1.")
