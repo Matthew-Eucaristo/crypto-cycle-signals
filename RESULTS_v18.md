@@ -10,13 +10,13 @@ Honest sim (next-open/limit fills, slippage+fees), Binance USDT-M perps.
 | BASE17 on final universe | 101 syms × 3 TF | 44 | 77.3% | +1.32 | +58.0 | 6.5 |
 | v18 phase-3 (A+B tiers) | 101 syms × 3 TF | 70 | 64.3% | +1.90 | +133.1 | 6.24 |
 | v18 phase-3 config on 107-perp universe | 107 syms × 3 TF | 76 | 57.9% | +1.11 | +84.1 | 3.62 |
-| **v18 final (phase-4, on 107-perp)** | **107 syms × 3 TF** | **119** | **60.5%** | **+1.06** | **+125.7** | **3.65** |
+| **v18 final (phase-4, on 107-perp)** | **107 syms × 3 TF** | **129** | **60.5%** | **+1.01** | **+130.1** | **3.55** |
 
 Universe expanded mid-session: +6 tier-2 perps (ONDO, HYPE, 1000PEPE,
 1000FLOKI, ZRO, EIGEN) → 321 cells, and all histories appended through
 2026-09-28. The phase-3 config re-measured on the bigger universe drops to
 +84.1R / 57.9% WR (below the 60% floor) — phase-4 adoptions restore both:
-**+125.7R / 60.5% WR** with 119 trades (the most signals yet at ≥60% WR).
+**+130.1R / 60.5% WR** with 129 trades (the most signals yet at ≥60% WR).
 
 Phase-4 adoptions (all measured on the 321-cell universe):
 `fill_cnd_max=1.0` — cancel limit fills on >1.0-ATR fill bars (wide fill
@@ -27,7 +27,7 @@ banned in BTC bull; `rg_adxlo=14`; `rg_tp_m=1.2`; `rg_volr=62`;
 `rg_rsi=2` (fades need RSI ≤34/≥66) + `rg_ext=2.8` (deeper fades only —
 unlocks the biggest frequency lane, +46R gross); per-TF `fill_cnd_max`
 0.8/0.875/1.5 (15m/1h/4h) restores WR ≥60% over the widened fade pool;
-trend `vl_lo=45`. Confidence tiers refit on the 90-trade set: nf≥4 →
+trend `vl_lo=45`; `pull_entry=0.45` (deeper limit fill → better entry price). Confidence tiers refit on the 90-trade set: nf≥4 →
 86% WR, nf 2–3 → ~60%, nf≤1 → 55%.
 
 Per-tier coverage (all tiers trade now): MAJOR 2t/100%/+3.6R, BIG 10t/60%/
