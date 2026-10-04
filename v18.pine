@@ -1,5 +1,5 @@
 //@version=6
-indicator("Adaptive Signals V18 — Self-Calibrating Quant", shorttitle="SignalsV18", overlay=false, max_labels_count=500, max_lines_count=100, max_boxes_count=120, max_bars_back=3000)
+indicator("Adaptive Signals V18 — Self-Calibrating Quant", shorttitle="SignalsV18", overlay=false, max_labels_count=500, max_lines_count=500, max_boxes_count=500, max_bars_back=3000)
 
 // Recommended: BINANCE:BTCUSDT.P 15m. Same first-principles stack on any chart:
 // auto profile BTC / CRYPTO / STOCKS / INDEX / FX / METALS / FUTURES, and
@@ -163,6 +163,7 @@ float costBps = input.float(10.0, "Commissions round-trip (bps)", minval=0.0, ma
 bool protectAfterTP1 = input.bool(true, "Protect after TP1", group=G_ADV, active=showAdv, display=display.none)
 bool trailAfterTP2 = input.bool(true, "Trail after TP2", group=G_ADV, active=showAdv, display=display.none)
 bool showStructure = input.bool(true, "Show SMC structure", group=G_ADV, active=showAdv, display=display.none)
+bool showDiag = input.bool(true, "Diagnostic markers", tooltip="Tiny ✕ labels mark bars where a score cleared the gate but another check blocked the signal (HTF/TRIG/FLOW/ROOM/COOL/PEND/TRADE/DIR/DPS/VLR/S>L). Also plots score vs gate in the data pane.", group=G_SET)
 
 // TIMEFRAME-ADAPTIVE WINDOWS (identical to V10 values on 15m)
 // Non-time-based charts (renko/range/etc.) report na seconds — fall back to
@@ -874,6 +875,15 @@ string confStarS = confFlagsS >= 4 ? " ★★★" : confFlagsS >= 2 ? " ★★" 
 if longSignalAny or shortSignalAny
     lastSignalBar := bar_index
 
+// DIAGNOSTICS: where a score cleared the gate but no signal fired, tag the blocker.
+if showDiag and barstate.isconfirmed
+    if longScore >= adaptiveGate and not longSignalAny
+        string rL = tradeActive ? "TRADE" : not pendFree ? "PEND" : not cooldownOK ? "COOL" : not dirLongOK ? "DIR" : not longRaw ? (not longRegime ? "HTF" : not longTrig ? "TRIG" : not volGateL ? "VOLG" : chopVeto ? "CHOP" : volSpikeVeto ? "VSPIKE" : deadVolVeto ? "DEADV" : rsi >= 76.0 ? "RSI76" : diPlus < diMinus ? "DI" : not longFlowOK ? "FLOW" : not longX ? "X" : not liveSession ? "SESS" : not liqOK ? "DPS" : volRank < vlFloor ? "VLR" : "RAW") : not longRoomOK ? "ROOM" : (shortRaw and shortScore > longScore) ? "S>L" : "?"
+        label.new(bar_index, low, "\u2715L " + str.tostring(longScore, "#") + " " + rL, yloc=yloc.belowbar, style=label.style_none, color=color.new(C_MUTE, 40), textcolor=color.new(#9aa0ac, 0), size=size.tiny, force_overlay=true)
+    if shortScore >= adaptiveGate and not shortSignalAny
+        string rS = tradeActive ? "TRADE" : not pendFree ? "PEND" : not cooldownOK ? "COOL" : not dirShortOK ? "DIR" : not shortRaw ? (not shortRegime ? "HTF" : not shortTrig ? "TRIG" : not volGateS ? "VOLG" : chopVeto ? "CHOP" : volSpikeVeto ? "VSPIKE" : deadVolVeto ? "DEADV" : rsi <= 24.0 ? "RSI24" : diMinus < diPlus ? "DI" : not shortFlowOK ? "FLOW" : not shortX ? "X" : not liveSession ? "SESS" : not liqOK ? "DPS" : volRank < vlFloor ? "VLR" : "RAW") : not shortRoomOK ? "ROOM" : longSignalAny ? "LWIN" : "?"
+        label.new(bar_index, high, "\u2715S " + str.tostring(shortScore, "#") + " " + rS, yloc=yloc.abovebar, style=label.style_none, color=color.new(C_MUTE, 40), textcolor=color.new(#9aa0ac, 0), size=size.tiny, force_overlay=true)
+
 // WHY / WAIT
 string waitReason = "WAIT"
 if tradeActive
@@ -1236,6 +1246,9 @@ p50 = plot(ema50, "EMA 50", color=#818cf8, linewidth=2, force_overlay=true)
 fill(p25, p50, color=ema25 > ema50 ? color.new(C_LONG, 94) : color.new(C_SHORT, 94), title="Trend cloud")
 plot(ema200, "EMA 200", color=#64748b, linewidth=1, force_overlay=true)
 plot(vwap, "VWAP", color=#e2e8f0, linewidth=1, force_overlay=true)
+plot(showDiag ? longScore : na, "Score L", color=color.new(C_LONG, 20), linewidth=1)
+plot(showDiag ? shortScore : na, "Score S", color=color.new(C_SHORT, 20), linewidth=1)
+plot(showDiag ? adaptiveGate : na, "Gate", color=color.new(#9aa0ac, 0), linewidth=1, style=plot.style_linebr)
 
 float planEntryPx = tradeActive ? tradeEntry : pendDir != 0 and not na(pendLimitPx) ? pendLimitPx : close
 float planSLPx = tradeActive ? tradeSL : pendDir != 0 and not na(pendSL) ? pendSL : previewSL
