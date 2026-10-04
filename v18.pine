@@ -6,8 +6,8 @@ indicator("Adaptive Signals V18 — Self-Calibrating Quant", shorttitle="Signals
 // percentile windows + HTF ladder scale to the chart timeframe. Research-only.
 // Default action is WAIT.
 //
-// V18 — measured wins over V17 (+58.0R → +238.4R on expanded 107-perp universe):
-//   phase-4 adoptions (196t / 62.2% WR / PF 4.17): fill-bar candle filter
+// V18 — measured wins over V17 (+58.0R → +249.1R on expanded 107-perp universe):
+//   phase-4 adoptions (208t / 61.5% WR / PF 4.05): fill-bar candle filter
 //   (wide fill candles = momentum slicing the limit → reject; per-TF 0.7/0.875/1.5A),
 //   pullback limit deepened 0.35→0.45A,
 //   exits re-fit on the widened pool: short TP ×3→×2.5, long TP ×1.2→×1.8,
@@ -138,6 +138,8 @@ int pullWait = input.int(15, "Pullback order validity (bars)", minval=1, maxval=
 float sTpM = input.float(2.5, "Short TP multiplier", minval=0.5, maxval=5.0, step=0.1, group=G_ADV, active=showAdv, display=display.none)
 float lTpM = input.float(1.8, "Long TP multiplier", minval=0.5, maxval=3.0, step=0.1, group=G_ADV, active=showAdv, display=display.none)
 float sTrailM = input.float(0.02, "Short trail multiplier", minval=0.02, maxval=2.0, step=0.01, group=G_ADV, active=showAdv, display=display.none)
+float lTrailM = input.float(0.5, "Long trail multiplier", minval=0.1, maxval=2.0, step=0.1, group=G_ADV, active=showAdv, display=display.none)
+float sPullM = input.float(1.5, "Short pullback depth multiplier", minval=0.5, maxval=3.0, step=0.1, group=G_ADV, active=showAdv, display=display.none)
 float lGb = input.float(1.25, "Long post-TP1 lock (R)", minval=0.0, maxval=3.0, step=0.1, group=G_ADV, active=showAdv, display=display.none)
 float sGb = input.float(3.0, "Short post-TP1 lock (R)", minval=0.0, maxval=3.0, step=0.1, group=G_ADV, active=showAdv, display=display.none)
 float vlFloor = input.float(45.0, "Min volume rank", minval=0.0, maxval=60.0, step=5.0, group=G_ADV, active=showAdv, display=display.none)
@@ -995,7 +997,7 @@ if shortSignalAny
     pendWhy := isRg ? "RANGE" : shortWhy
     pendValid := validBars
     pendSigBar := bar_index
-    pendLimitPx := pullEntryATR > 0.0 ? close + pullEntryATR * atr : na
+    pendLimitPx := pullEntryATR > 0.0 ? close + pullEntryATR * atr * sPullM : na
     pendExp := pullEntryATR > 0.0 ? bar_index + pullWait : bar_index + 1
     label.new(bar_index, close, "\u25BC " + (bShort ? "B " : "") + (rangeShort ? "RNG SHORT " : shortVol ? "SHORT SQ " : "SHORT ") + str.tostring(rangeShort ? 78 : shortScore, "#") + " " + f_conf_word(shortScore, adaptiveGate) + confStarS + "\nTP " + str.tostring(shortTP2p, format.mintick) + " · SL " + str.tostring(shortStopPx, format.mintick) + "\n" + str.tostring((close - shortTP2p) / math.max(shortRisk, syminfo.mintick), "#.#") + "R · ≤" + str.tostring(validBars) + "b", yloc=yloc.abovebar, style=label.style_label_down, color=color.new(C_SHORT, bShort ? 55 : shortVol ? 0 : 12), textcolor=color.white, size=bShort ? size.small : size.normal, force_overlay=true)
     float sgRef = pullEntryATR > 0.0 ? nz(pendLimitPx, close) : close
@@ -1099,7 +1101,7 @@ if tradeActive and bar_index >= tradeEntryBar
             if tp1Hit and protectAfterTP1
                 tradeSL := math.max(tradeSL, tradeEntry + math.max(atr * 0.02, tradeRisk0 * lGb))
             if tp2Hit and trailAfterTP2
-                tradeSL := math.max(tradeSL, highestSince - atr * trailATR)
+                tradeSL := math.max(tradeSL, highestSince - atr * trailATR * lTrailM)
             if not tradeRange and not h1Bull and held >= 2
                 tradeActive := false
                 tradeStatus := "LONG FLIP"
