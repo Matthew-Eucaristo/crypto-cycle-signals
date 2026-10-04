@@ -34,7 +34,11 @@ overtargeted), `l_tp_m 1.2→1.8` (long runners underfed), `s_trail_m 0.02`,
 per-TF `cryptoGateBump` 4/8/5 on 15m/1h/4h (+24.9R/+4.8R — the flat +8 bump
 was over-priced on fast frames) and 15m `minDps=800` + `fill_cnd_max=0.7`; `pbWin 6→2` — only an
 EMA25 tap within 2 bars counts (stale taps dilute, +0.7R & +1.5pt WR).
-Fee stress: 3× costs → +176.2R/60.8%; 5× → +152.1R/60.1% — edge survives. Confidence tiers refit on the 90-trade set: nf≥4 →
+Fee stress: 3× costs → +176.2R/60.8%; 5× → +152.1R/60.1% — edge survives.
+
+**Quality preset** (higher accuracy, fewer signals): 4h `minDps=200` →
+135t / 64.4% WR / +195.5R / PF 5.04; global `minDps=400` → 51t / 70.6% / PF 5.65.
+Default stays the max-net config per the ≥60% floor + max frequency criterion. Confidence tiers refit on the 90-trade set: nf≥4 →
 86% WR, nf 2–3 → ~60%, nf≤1 → 55%.
 
 Per-tier coverage (all tiers trade now): MAJOR 2t/100%/+3.6R, BIG 10t/60%/
