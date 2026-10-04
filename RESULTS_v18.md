@@ -10,13 +10,13 @@ Honest sim (next-open/limit fills, slippage+fees), Binance USDT-M perps.
 | BASE17 on final universe | 101 syms × 3 TF | 44 | 77.3% | +1.32 | +58.0 | 6.5 |
 | v18 phase-3 (A+B tiers) | 101 syms × 3 TF | 70 | 64.3% | +1.90 | +133.1 | 6.24 |
 | v18 phase-3 config on 107-perp universe | 107 syms × 3 TF | 76 | 57.9% | +1.11 | +84.1 | 3.62 |
-| **v18 final (phase-4, on 107-perp)** | **107 syms × 3 TF** | **153** | **61.4%** | **+1.29** | **+196.9** | **4.34** |
+| **v18 final (phase-4, on 107-perp)** | **107 syms × 3 TF** | **146** | **63.7%** | **+1.37** | **+200.0** | **4.74** |
 
 Universe expanded mid-session: +6 tier-2 perps (ONDO, HYPE, 1000PEPE,
 1000FLOKI, ZRO, EIGEN) → 321 cells, and all histories appended through
 2026-09-28. The phase-3 config re-measured on the bigger universe drops to
 +84.1R / 57.9% WR (below the 60% floor) — phase-4 adoptions restore both:
-**+196.9R / 61.4% WR** with 153 trades (the most signals yet at ≥60% WR).
+**+200.0R / 63.7% WR** with 146 trades (the most signals yet at ≥60% WR).
 
 Phase-4 adoptions (all measured on the 321-cell universe):
 `fill_cnd_max=1.0` — cancel limit fills on >1.0-ATR fill bars (wide fill
@@ -32,7 +32,8 @@ exit re-fit on the widened pool: `s_tp_m 3.0→2.5` (+19.7R — short runners we
 overtargeted), `l_tp_m 1.2→1.8` (long runners underfed), `s_trail_m 0.02`,
 `maxHoldBars 256` (4h 288 — winners were cut by the clock, not the structure);
 per-TF `cryptoGateBump` 4/8/6 on 15m/1h/4h (+24.9R/+4.8R — the flat +8 bump
-was over-priced on fast frames) and 15m `minDps=800` ($-liquidity floor) + `fill_cnd_max=0.7`.
+was over-priced on fast frames) and 15m `minDps=800` + `fill_cnd_max=0.7`; `pbWin 6→2` — only an
+EMA25 tap within 2 bars counts (stale taps dilute, +0.7R & +1.5pt WR).
 Fee stress: 3× costs → +176.2R/60.8%; 5× → +152.1R/60.1% — edge survives. Confidence tiers refit on the 90-trade set: nf≥4 →
 86% WR, nf 2–3 → ~60%, nf≤1 → 55%.
 

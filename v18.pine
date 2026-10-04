@@ -6,8 +6,8 @@ indicator("Adaptive Signals V18 — Self-Calibrating Quant", shorttitle="Signals
 // percentile windows + HTF ladder scale to the chart timeframe. Research-only.
 // Default action is WAIT.
 //
-// V18 — measured wins over V17 (+58.0R → +196.9R on expanded 107-perp universe):
-//   phase-4 adoptions (153t / 61.4% WR / PF 4.34): fill-bar candle filter
+// V18 — measured wins over V17 (+58.0R → +200.0R on expanded 107-perp universe):
+//   phase-4 adoptions (146t / 63.7% WR / PF 4.74): fill-bar candle filter
 //   (wide fill candles = momentum slicing the limit → reject; per-TF 0.7/0.875/1.5A),
 //   pullback limit deepened 0.35→0.45A,
 //   exits re-fit on the widened pool: short TP ×3→×2.5, long TP ×1.2→×1.8,
@@ -16,7 +16,8 @@ indicator("Adaptive Signals V18 — Self-Calibrating Quant", shorttitle="Signals
 //   (+24.9R at held floor), 4h 8→6 (+4.8R), 15m min $-liquidity 800k/s,
 //   border band widened 6→9, range fades opened (Both dirs, no cycle ban,
 //   capitulation-close ≤0.35/≥0.65, ADX floor 14, TP×1.2, ext 2.8, rsi 34/66,
-//   volRank 62, trend volRank floor 45).
+//   volRank 62, trend volRank floor 45), pullback window 6→2
+//   (stale EMA25 taps dilute; fresh taps only).
 //   short TP ×3, tight short trail ×0.05, longer pullback validity 15b,
 //   volRank≥35 entry floor, long post-TP1 +1R lock, no TP1 partial,
 //   range TP ×1.5, range pull 0.5×, tighter stop 2.5A, border-pass B-tier
@@ -129,7 +130,7 @@ float stopATR = input.float(2.40, "Stop ATR", minval=0.8, maxval=3.0, step=0.05,
 float targetR = input.float(3.00, "Target R (TP2)", minval=1.0, maxval=4.5, step=0.10, group=G_ADV, active=showAdv, display=display.none)
 float tp1Base = input.float(1.50, "TP1 base (R)", minval=0.4, maxval=2.4, step=0.10, group=G_ADV, active=showAdv, display=display.none)
 int maxHoldBars = input.int(256, "Max hold (bars)", minval=8, maxval=384, group=G_ADV, active=showAdv, display=display.none)
-int pbWin = input.int(6, "Pullback window (bars)", tooltip="Resume family: EMA25 must have been tapped within this many bars.", minval=2, maxval=12, group=G_ADV, active=showAdv, display=display.none)
+int pbWin = input.int(2, "Pullback window (bars)", tooltip="Resume family: EMA25 must have been tapped within this many bars.", minval=2, maxval=12, group=G_ADV, active=showAdv, display=display.none)
 float pbDeepMax = input.float(1.5, "Pullback max depth (ATR)", minval=0.4, maxval=4.0, step=0.1, group=G_ADV, active=showAdv, display=display.none)
 float roomMinR = input.float(1.2, "Min room to HTF wall (R)", minval=0.5, maxval=3.0, step=0.05, tooltip="Biggest measured win: require >=1.2R of open space to the HTF liquidity wall before entering.", group=G_ADV, active=showAdv, display=display.none)
 float pullEntryATR = input.float(0.45, "Pullback limit entry (ATR)", minval=0.0, maxval=1.0, step=0.05, tooltip="Post a limit order pullEntryATR*ATR inside the signal close, valid for PullWait bars. 0 = fill at next bar open.", group=G_ADV, active=showAdv, display=display.none)
