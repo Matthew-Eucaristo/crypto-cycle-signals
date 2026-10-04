@@ -6,7 +6,11 @@ indicator("Adaptive Signals V18 — Self-Calibrating Quant", shorttitle="Signals
 // percentile windows + HTF ladder scale to the chart timeframe. Research-only.
 // Default action is WAIT.
 //
-// V18 — measured wins over V17 (+58.0R → +133.1R on same 101-perp universe):
+// V18 — measured wins over V17 (+58.0R → +99.2R on expanded 107-perp universe):
+//   phase-4 adoptions (90t / 61.1% WR / PF 3.71): fill-bar candle filter 1.0A
+//   (wide fill candles = momentum slicing the limit → reject, keeps WR≥60%),
+//   border band widened 6→9, range fades opened (Both dirs, no cycle ban,
+//   capitulation-close ≤0.35/≥0.65, ADX floor 14, TP×1.2).
 //   short TP ×3, tight short trail ×0.05, longer pullback validity 15b,
 //   volRank≥35 entry floor, long post-TP1 +1R lock, no TP1 partial,
 //   range TP ×1.5, range pull 0.5×, tighter stop 2.5A, border-pass B-tier
@@ -130,18 +134,19 @@ float sTrailM = input.float(0.05, "Short trail multiplier", minval=0.05, maxval=
 float lGb = input.float(1.25, "Long post-TP1 lock (R)", minval=0.0, maxval=3.0, step=0.1, group=G_ADV, active=showAdv, display=display.none)
 float sGb = input.float(3.0, "Short post-TP1 lock (R)", minval=0.0, maxval=3.0, step=0.1, group=G_ADV, active=showAdv, display=display.none)
 float vlFloor = input.float(35.0, "Min volume rank", minval=0.0, maxval=60.0, step=5.0, group=G_ADV, active=showAdv, display=display.none)
-bool showB = input.bool(true, "B-tier signals (border pass)", tooltip="Borderline setups promoted when ER>=0.35 + room: score within 6 pts under the A gate in efficient tape. Lab/sim measured +5.9R net, ~60% WR combined.", group=G_ADV, active=showAdv, display=display.none)
+bool showB = input.bool(true, "B-tier signals (border pass)", tooltip="Borderline setups promoted when ER>=0.35 + room: score within 9 pts under the A gate in efficient tape. Band width measured on the 107-perp universe (9 optimal; 12 breaks the 60% WR floor).", group=G_ADV, active=showAdv, display=display.none)
 bool learnTargets = input.bool(false, "Adaptive TP (learned shrink)", tooltip="OFF = fixed targets (measured +14R better on the strict config). ON = shrink targets toward learned MFE quantiles.", group=G_ADV, active=showAdv, display=display.none)
 bool rgMode = input.bool(true, "Range-fade module (1h+)", tooltip="Mean-reversion fades in chop regimes (ADX<20, ER<0.15): fade >=2.2-ATR deviations back to EMA50. Auto-off below 1h — measured net loss on 15m.", group=G_ADV, active=showAdv, display=display.none)
 float rgExt = input.float(2.6, "Range fade extension (ATR)", minval=1.0, maxval=4.0, step=0.1, group=G_ADV, active=showAdv, display=display.none)
 float rgStopATR = input.float(1.5, "Range fade stop (ATR)", minval=0.8, maxval=3.0, step=0.1, group=G_ADV, active=showAdv, display=display.none)
 float rgVolrMin = input.float(55.0, "Range fade min volume rank", minval=0, maxval=100, step=5, group=G_ADV, active=showAdv, display=display.none)
-float rgAdxLo = input.float(16.0, "Range fade ADX floor", minval=0, maxval=25, step=1, group=G_ADV, active=showAdv, display=display.none)
+float rgAdxLo = input.float(14.0, "Range fade ADX floor", minval=0, maxval=25, step=1, group=G_ADV, active=showAdv, display=display.none)
 float rgAdxHi = input.float(20.0, "Range fade ADX ceiling", minval=10, maxval=35, step=1, group=G_ADV, active=showAdv, display=display.none)
-string rgDirs = input.string("Long only", "Range fade directions", options=["Long only", "Both", "Short only"], tooltip="Long only measured best (84% WR, PF 10.9): dip-fades into EMA50 win; rip-fades fight the squeeze flow.", group=G_ADV, active=showAdv, display=display.none)
-string rgCycle = input.string("Aligned", "Range fades vs BTC cycle", options=["Any", "No bull fades", "Aligned"], tooltip="Aligned = fade dips only outside bear, fade rips only outside bull (measured best: 64% WR, PF 3.5). Any = ignore cycle (+15R total, lower WR).", group=G_ADV, active=showAdv, display=display.none)
+string rgDirs = input.string("Both", "Range fade directions", options=["Long only", "Both", "Short only"], tooltip="Both measured best on the 107-perp universe: short rip-fades add net R once the capitulation-close filter is on (fades require close in the extreme 35% of the bar).", group=G_ADV, active=showAdv, display=display.none)
+string rgCycle = input.string("Any", "Range fades vs BTC cycle", options=["Any", "No bull fades", "Aligned"], tooltip="Any measured best on the 107-perp universe (+5.6R): fading during bull is no longer an auto-loser once the capitulation-close filter gates entries.", group=G_ADV, active=showAdv, display=display.none)
 float minDollarFlow = input.float(0.0, "Min dollar volume $/s (0=off)", minval=0, maxval=100000, step=50, tooltip="Median close*volume per second over 96 bars. Charts under 1h always enforce >=600 (measured win); set a value here to also filter slow charts.", group=G_ADV, active=showAdv, display=display.none)
 float pbVolGate = input.float(30.0, "Pullback min volume percentile", tooltip="Resume bars are low-volume by nature; dips get their own, softer volume gate.", minval=10, maxval=70, step=5, group=G_ADV, active=showAdv, display=display.none)
+float fillCndMax = input.float(1.0, "Max fill-bar candle range (ATR)", minval=0.0, maxval=3.0, step=0.1, tooltip="0=off. Cancels the limit order when the fill bar's range exceeds 1.0 ATR — a wide candle means momentum is slicing through the limit (measured: <=0.74A → 83% WR, >=1.35A → 50% WR).", group=G_ADV, active=showAdv, display=display.none)
 bool tpSmart = input.bool(true, "Cap TP3 at liquidity wall", group=G_ADV, active=showAdv, display=display.none)
 int cooldownBars = input.int(4, "Cooldown (bars)", minval=0, maxval=32, group=G_ADV, active=showAdv, display=display.none)
 float slipBps = input.float(2.0, "Slippage per fill (bps)", minval=0.0, maxval=20.0, step=0.5, group=G_ADV, active=showAdv, display=display.none)
@@ -834,9 +839,9 @@ bool rangeShort = false
 if rgMode and chartSec >= 3600 and barstate.isconfirmed and not tradeActive and pendDir == 0 and cooldownOK and liqOK and liveSession
     if adx < rgAdxHi and adx >= rgAdxLo and er32 < 0.15 and volRank >= rgVolrMin
         float devA = (ema50 - close) / atr
-        if devA >= rgExt and rsi <= 32.0 and closeLocation <= 0.30 and rgDirs != "Short only" and (rgCycle != "Aligned" or not btcCycBear)
+        if devA >= rgExt and rsi <= 32.0 and closeLocation <= 0.35 and rgDirs != "Short only" and (rgCycle != "Aligned" or not btcCycBear)
             rangeLong := true
-        else if devA <= -rgExt and rsi >= 68.0 and closeLocation >= 0.70 and rgDirs != "Long only" and (rgCycle != "Aligned" or not btcCycBull)
+        else if devA <= -rgExt and rsi >= 68.0 and closeLocation >= 0.65 and rgDirs != "Long only" and (rgCycle != "Aligned" or not btcCycBull)
             rangeShort := true
         if rgCycle == "No bull fades" and btcCycBull
             rangeLong := false
@@ -845,10 +850,16 @@ bool pendFree = pendDir == 0 or pendRange
 bool longSignal = (barstate.isconfirmed and not tradeActive and pendFree and cooldownOK and dirLongOK and longRaw and longScore >= adaptiveGate and longRoomOK and (not shortRaw or longScore >= shortScore)) or (rgMode and rangeLong)
 bool shortSignal = ((barstate.isconfirmed and not tradeActive and pendFree and cooldownOK and dirShortOK and shortRaw and shortScore >= adaptiveGate and shortRoomOK) or (rgMode and rangeShort)) and not longSignal
 // B-tier: same confluence, score in the 4-pt band under the A gate (measured ~48% WR — real but weaker)
-bool bLong = showB and barstate.isconfirmed and not tradeActive and pendFree and cooldownOK and dirLongOK and longRaw and not longSignal and longScore >= adaptiveGate - 6.0 and longScore < adaptiveGate and longRoomOK and er32 >= 0.35 and not chopVeto and (not shortRaw or longScore >= shortScore)
-bool bShort = showB and barstate.isconfirmed and not tradeActive and pendFree and cooldownOK and dirShortOK and shortRaw and not bLong and not longSignal and not shortSignal and shortScore >= adaptiveGate - 6.0 and shortScore < adaptiveGate and shortRoomOK and er32 >= 0.35 and not chopVeto
+bool bLong = showB and barstate.isconfirmed and not tradeActive and pendFree and cooldownOK and dirLongOK and longRaw and not longSignal and longScore >= adaptiveGate - 9.0 and longScore < adaptiveGate and longRoomOK and er32 >= 0.35 and not chopVeto and (not shortRaw or longScore >= shortScore)
+bool bShort = showB and barstate.isconfirmed and not tradeActive and pendFree and cooldownOK and dirShortOK and shortRaw and not bLong and not longSignal and not shortSignal and shortScore >= adaptiveGate - 9.0 and shortScore < adaptiveGate and shortRoomOK and er32 >= 0.35 and not chopVeto
 bool longSignalAny = longSignal or bLong
 bool shortSignalAny = shortSignal or bShort
+
+// measured confidence flags (refit on the 90-trade set): nf>=4 → ~86% hist WR, nf 2-3 → ~60%, nf<=1 → ~55%
+int confFlagsL = (longScore >= 82.0 ? 1 : 0) + (volRank >= 73.0 ? 1 : 0) + (adx >= 37.8 ? 1 : 0) + (longAmb <= 0.54 ? 1 : 0) + (extensionATR >= 1.9 ? 1 : 0) + (rsi <= 33.0 ? 1 : 0) + (closeLocation >= 0.31 and closeLocation <= 0.62 ? 1 : 0)
+int confFlagsS = (shortScore >= 82.0 ? 1 : 0) + (volRank >= 73.0 ? 1 : 0) + (adx >= 37.8 ? 1 : 0) + (shortAmb <= 0.54 ? 1 : 0) + (extensionATR >= 1.9 ? 1 : 0) + (rsi >= 67.0 ? 1 : 0) + (closeLocation >= 0.31 and closeLocation <= 0.62 ? 1 : 0)
+string confStarL = confFlagsL >= 4 ? " ★★★" : confFlagsL >= 2 ? " ★★" : " ★"
+string confStarS = confFlagsS >= 4 ? " ★★★" : confFlagsS >= 2 ? " ★★" : " ★"
 if longSignalAny or shortSignalAny
     lastSignalBar := bar_index
 
@@ -938,7 +949,7 @@ float costFrac = costBps / 10000.0
 if longSignalAny
     bool isRg = rangeLong
     float rgRisk = rgStopATR * atr
-    float rgT1 = f_clamp(math.abs(ema50 - close) / math.max(rgRisk, syminfo.mintick) * 1.5, 0.30, 2.20)
+    float rgT1 = f_clamp(math.abs(ema50 - close) / math.max(rgRisk, syminfo.mintick) * 1.2, 0.30, 2.20)
     pendDir := 1
     pendSL := isRg ? close - rgRisk : longStopPx
     pendTP1px := isRg ? close + rgRisk * rgT1 : longTP1p
@@ -954,7 +965,7 @@ if longSignalAny
     pendSigBar := bar_index
     pendLimitPx := pullEntryATR > 0.0 ? close - pullEntryATR * atr * (isRg ? 0.5 : 1.0) : na
     pendExp := pullEntryATR > 0.0 ? bar_index + pullWait : bar_index + 1
-    label.new(bar_index, close, "\u25B2 " + (bLong ? "B " : "") + (rangeLong ? "RNG LONG " : longVol ? "LONG SQ " : "LONG ") + str.tostring(rangeLong ? 78 : longScore, "#") + " " + f_conf_word(longScore, adaptiveGate) + "\nTP " + str.tostring(longTP2p, format.mintick) + " · SL " + str.tostring(longStopPx, format.mintick) + "\n" + str.tostring((longTP2p - close) / math.max(longRisk, syminfo.mintick), "#.#") + "R · ≤" + str.tostring(validBars) + "b", yloc=yloc.belowbar, style=label.style_label_up, color=color.new(C_LONG, bLong ? 55 : longVol ? 0 : 12), textcolor=color.white, size=bLong ? size.small : size.normal, force_overlay=true)
+    label.new(bar_index, close, "\u25B2 " + (bLong ? "B " : "") + (rangeLong ? "RNG LONG " : longVol ? "LONG SQ " : "LONG ") + str.tostring(rangeLong ? 78 : longScore, "#") + " " + f_conf_word(longScore, adaptiveGate) + confStarL + "\nTP " + str.tostring(longTP2p, format.mintick) + " · SL " + str.tostring(longStopPx, format.mintick) + "\n" + str.tostring((longTP2p - close) / math.max(longRisk, syminfo.mintick), "#.#") + "R · ≤" + str.tostring(validBars) + "b", yloc=yloc.belowbar, style=label.style_label_up, color=color.new(C_LONG, bLong ? 55 : longVol ? 0 : 12), textcolor=color.white, size=bLong ? size.small : size.normal, force_overlay=true)
     float sgRef = pullEntryATR > 0.0 ? nz(pendLimitPx, close) : close
     box.new(bar_index, pendTP1px, bar_index + int(math.min(validBars, 24)), sgRef, xloc=xloc.bar_index, bgcolor=color.new(C_LONG, 88), border_color=color.new(C_LONG, 40), force_overlay=true)
     box.new(bar_index, sgRef, bar_index + int(math.min(validBars, 24)), pendSL, xloc=xloc.bar_index, bgcolor=color.new(C_SHORT, 88), border_color=color.new(C_SHORT, 40), force_overlay=true)
@@ -962,7 +973,7 @@ if longSignalAny
 if shortSignalAny
     bool isRg = rangeShort
     float rgRisk = rgStopATR * atr
-    float rgT1 = f_clamp(math.abs(ema50 - close) / math.max(rgRisk, syminfo.mintick) * 1.5, 0.30, 2.20)
+    float rgT1 = f_clamp(math.abs(ema50 - close) / math.max(rgRisk, syminfo.mintick) * 1.2, 0.30, 2.20)
     pendDir := -1
     pendSL := isRg ? close + rgRisk : shortStopPx
     pendTP1px := isRg ? close - rgRisk * rgT1 : shortTP1p
@@ -978,7 +989,7 @@ if shortSignalAny
     pendSigBar := bar_index
     pendLimitPx := pullEntryATR > 0.0 ? close + pullEntryATR * atr : na
     pendExp := pullEntryATR > 0.0 ? bar_index + pullWait : bar_index + 1
-    label.new(bar_index, close, "\u25BC " + (bShort ? "B " : "") + (rangeShort ? "RNG SHORT " : shortVol ? "SHORT SQ " : "SHORT ") + str.tostring(rangeShort ? 78 : shortScore, "#") + " " + f_conf_word(shortScore, adaptiveGate) + "\nTP " + str.tostring(shortTP2p, format.mintick) + " · SL " + str.tostring(shortStopPx, format.mintick) + "\n" + str.tostring((close - shortTP2p) / math.max(shortRisk, syminfo.mintick), "#.#") + "R · ≤" + str.tostring(validBars) + "b", yloc=yloc.abovebar, style=label.style_label_down, color=color.new(C_SHORT, bShort ? 55 : shortVol ? 0 : 12), textcolor=color.white, size=bShort ? size.small : size.normal, force_overlay=true)
+    label.new(bar_index, close, "\u25BC " + (bShort ? "B " : "") + (rangeShort ? "RNG SHORT " : shortVol ? "SHORT SQ " : "SHORT ") + str.tostring(rangeShort ? 78 : shortScore, "#") + " " + f_conf_word(shortScore, adaptiveGate) + confStarS + "\nTP " + str.tostring(shortTP2p, format.mintick) + " · SL " + str.tostring(shortStopPx, format.mintick) + "\n" + str.tostring((close - shortTP2p) / math.max(shortRisk, syminfo.mintick), "#.#") + "R · ≤" + str.tostring(validBars) + "b", yloc=yloc.abovebar, style=label.style_label_down, color=color.new(C_SHORT, bShort ? 55 : shortVol ? 0 : 12), textcolor=color.white, size=bShort ? size.small : size.normal, force_overlay=true)
     float sgRef = pullEntryATR > 0.0 ? nz(pendLimitPx, close) : close
     box.new(bar_index, sgRef, bar_index + int(math.min(validBars, 24)), pendSL, xloc=xloc.bar_index, bgcolor=color.new(C_SHORT, 88), border_color=color.new(C_SHORT, 40), force_overlay=true)
     box.new(bar_index, pendTP1px, bar_index + int(math.min(validBars, 24)), sgRef, xloc=xloc.bar_index, bgcolor=color.new(C_LONG, 88), border_color=color.new(C_LONG, 40), force_overlay=true)
@@ -1002,6 +1013,9 @@ if pendDir != 0 and bar_index > pendSigBar
     else
         filled := true
         fillPx := fillDir == 1 ? open * (1.0 + slip) : open * (1.0 - slip)
+    if filled and fillCndMax > 0.0 and (high - low) > fillCndMax * atr
+        filled := false
+        pendDir := 0
     if filled
         float riskNow = math.abs(fillPx - pendSL)
         bool gapBad = riskNow <= syminfo.mintick or (fillDir == 1 and (fillPx <= pendSL or fillPx >= pendTP1px)) or (fillDir == -1 and (fillPx >= pendSL or fillPx <= pendTP1px))
@@ -1431,6 +1445,12 @@ if barstate.islast
 
 alertcondition(longSignal, "V18 LONG", "Signals V18 LONG. Confirmed close. Entry = LIMIT order at the LIMIT line (pullback), valid ~5 bars — do not chase. Read why/score before acting.")
 alertcondition(shortSignal, "V18 SHORT", "Signals V18 SHORT. Confirmed close. Entry = LIMIT order at the LIMIT line (pullback), valid ~5 bars — do not chase. Read why/score before acting.")
+alertcondition(longSignal and confFlagsL >= 4, "V18 LONG ★★★", "Signals V18 LONG top-confidence (>=4 measured flags, ~86% hist WR). Entry = LIMIT at LIMIT line.")
+alertcondition(shortSignal and confFlagsS >= 4, "V18 SHORT ★★★", "Signals V18 SHORT top-confidence (>=4 measured flags, ~86% hist WR). Entry = LIMIT at LIMIT line.")
+alertcondition(longSignal and confFlagsL >= 2 and confFlagsL < 4, "V18 LONG ★★", "Signals V18 LONG high-confidence (2-3 measured flags, ~60% hist WR). Entry = LIMIT at LIMIT line.")
+alertcondition(shortSignal and confFlagsS >= 2 and confFlagsS < 4, "V18 SHORT ★★", "Signals V18 SHORT high-confidence (2-3 measured flags, ~60% hist WR). Entry = LIMIT at LIMIT line.")
+alertcondition(longSignal and confFlagsL <= 1, "V18 LONG ★", "Signals V18 LONG low-confidence (<=1 measured flag, ~55% hist WR). Size down or skip.")
+alertcondition(shortSignal and confFlagsS <= 1, "V18 SHORT ★", "Signals V18 SHORT low-confidence (<=1 measured flag, ~55% hist WR). Size down or skip.")
 alertcondition(not na(tp1Bar) and tp1Bar == bar_index, "V18 TP1", "Signals V18 TP1.")
 alertcondition(not na(tp2Bar) and tp2Bar == bar_index, "V18 TP2", "Signals V18 TP2 / runner.")
 alertcondition(bLong, "V18 LONG (B)", "Signals V18 LONG B-tier — lower confidence band (~48% hist WR). Entry = LIMIT at LIMIT line.")

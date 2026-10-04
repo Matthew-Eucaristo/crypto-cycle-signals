@@ -22,20 +22,20 @@ Trend signals preempt pending range orders, so the two legs never fight.
 
 ## Backtest results (the honest version)
 
-101 Binance USDT-M perps × 15m/1h/4h, 2020–2026, fees + slippage included (v18, latest):
+107 Binance USDT-M perps × 15m/1h/4h, 2020–2026, fees + slippage included (v18, latest):
 
 | Metric | Value |
 |---|---|
-| Trades | 68 |
-| Win rate | **62%** |
-| Avg | +1.78R |
-| Net | +133.1R |
-| Profit factor | 5.5 |
-| vs previous version | +58.0R on the same universe |
+| Trades | 90 |
+| Win rate | **61%** |
+| Avg | +1.10R |
+| Net | +99.2R |
+| Profit factor | 3.7 |
+| vs previous version | +84.1R on the same universe |
 
 Earlier config on the smaller 68-coin universe: 31 trades, 87% WR, +53.6R, PF 13.7.
 
-**Frequency: still selective.** ~68 signals across 6 years of data on 101 coins (A+B tiers). It can sit quiet for weeks on one chart. That's the price of the edge.
+**Frequency: selective but broader.** ~90 signals across 6 years of data on 107 coins — majors, big caps, mid caps and small caps all fire now (coverage: BTC/ETH +3.6R, big caps +11.7R, mid caps +17.5R, small caps +66.3R). It can still sit quiet for weeks on one chart. That's the price of the edge.
 
 ### Where it works / doesn't (measured)
 
@@ -43,7 +43,7 @@ Earlier config on the smaller 68-coin universe: 31 trades, 87% WR, +53.6R, PF 13
 - 15m works for trend only — **keep range fade OFF below 1h** (−0.33 avg measured, dead)
 - 4h works but thin (+0.35)
 - **Best on liquid mid caps**: WIF, ENA, TIA, FIL, THETA, LINK, LTC, BLUR, ORDI, SEI, MKR…
-- **Majors: ~zero signals.** BTC fired once in 6 years (a loss); ETH/SOL literally never passed the full confluence — majors are too efficient for this edge. That's by design, not a bug: when it says nothing, that's the answer.
+- **Majors: rare but alive.** ETH fired twice on the expanded universe (both winners); SOL still ~never passes full confluence — majors stay the least frequent by design: when it says nothing, that's the answer.
 - Load the **perpetual** ticker (`BINANCE:XXXUSDT.P`), not spot — filters are calibrated to perp data.
 
 ## How to use
@@ -60,17 +60,26 @@ Earlier config on the smaller 68-coin universe: 31 trades, 87% WR, +53.6R, PF 13
 ### Two confidence tiers
 
 - **A-tier** — the sniper signals (~68% hist WR on the 50 A trades). Full-size label.
-- **B-tier (border pass)** — borderline setups whose score lands within 6 pts under the A gate get promoted when the tape is efficient (ER≥0.35) and there's room. ~40% more signals than A-only, +5.9R net measured on 101 perps. Smaller dimmed label tagged `B`, own alerts (`V18 LONG (B)` etc). Toggle: *B-tier signals* in settings (default ON).
+- **B-tier (border pass)** — borderline setups whose score lands within 9 pts under the A gate get promoted when the tape is efficient (ER≥0.35) and there's room. Band width measured on 107 perps (9 optimal; 12 breaks the 60% WR floor). Smaller dimmed label tagged `B`, own alerts (`V18 LONG (B)` etc). Toggle: *B-tier signals* in settings (default ON).
+
+### Star confidence (measured flags on the signal bar)
+
+Every signal label shows ★/★★/★★★ from a 7-flag count fit on the 90-trade set:
+- **★★★** — 4+ flags → ~86% hist WR
+- **★★** — 2–3 flags → ~60% hist WR
+- **★** — ≤1 flag → ~55% hist WR (size down or skip)
+
+Separate alerts exist per tier so you can ping only ★★★ if you want.
 
 ### Alerts
 
-`V18 LONG/SHORT` (A-tier), `V18 LONG/SHORT (B)` (B-tier), `V18 FILLED` (limit order filled), `V18 TP1`, `V18 TP2`, `V18 TP3`, `V18 EXIT` (any close), `V18 DIR OFF` (self-learned direction shutdown).
+`V18 LONG/SHORT` (A-tier), `V18 LONG/SHORT ★★★`, `V18 LONG/SHORT ★★`, `V18 LONG/SHORT ★` (star tiers), `V18 LONG/SHORT (B)` (B-tier), `V18 FILLED` (limit order filled), `V18 TP1`, `V18 TP2`, `V18 TP3`, `V18 EXIT` (any close), `V18 DIR OFF` (self-learned direction shutdown).
 
 ### Useful settings
 
 - **Validity gate** (default 74): drop to ~70 for ~2× more signals at lower quality
 - **Range ADX ceiling** 18: ultra-quality preset (81% WR, PF ~9)
-- **Range directions**: Long only (default, measured best) / Both / Short only
+- **Range directions**: Both (default — short fades measured additive once the capitulation-close filter gates them) / Long only / Short only
 - **BTC anchor**: Cycle+Trend (default) / Trend only — the 4-year-cycle doctrine is built in
 - **B-tier signals**: off = sniper-only view
 

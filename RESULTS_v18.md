@@ -8,15 +8,28 @@ Honest sim (next-open/limit fills, slippage+fees), Binance USDT-M perps.
 |---|---|---|---|---|---|---|
 | v17 (baseline) | 68 syms × 3 TF | 31 | 87.1% | +1.73 | +53.6 | 13.7 |
 | BASE17 on final universe | 101 syms × 3 TF | 44 | 77.3% | +1.32 | +58.0 | 6.5 |
-| v18 A-tier only | 101 syms × 3 TF | 50 | 68.0% | +2.24 | +111.9 | 7.7 |
-| **v18 final (A+B tiers)** | **101 syms × 3 TF** | **70** | **64.3%** | **+1.90** | **+133.1** | **6.24** |
+| v18 phase-3 (A+B tiers) | 101 syms × 3 TF | 70 | 64.3% | +1.90 | +133.1 | 6.24 |
+| v18 phase-3 config on 107-perp universe | 107 syms × 3 TF | 76 | 57.9% | +1.11 | +84.1 | 3.62 |
+| **v18 final (phase-4, on 107-perp)** | **107 syms × 3 TF** | **90** | **61.1%** | **+1.10** | **+99.2** | **3.71** |
 
-Apples-to-apples on the final 303-cell universe: v18 makes +133.1R vs BASE17's
-+58.0R — ~2× total R, with ~50% more trades than the pure-sniper config.
+Universe expanded mid-session: +6 tier-2 perps (ONDO, HYPE, 1000PEPE,
+1000FLOKI, ZRO, EIGEN) → 321 cells, and all histories appended through
+2026-09-28. The phase-3 config re-measured on the bigger universe drops to
++84.1R / 57.9% WR (below the 60% floor) — phase-4 adoptions restore both:
+**+99.2R / 61.1% WR** with 90 trades (the most signals yet at ≥60% WR).
 
-Later-session additions: `stopATR 2.6→2.5` (+1.9R), `border_pass` 6-pt band
-(+5.9R, the engine-validated "B-tier"), and `s_gb=3.0` — shorts post-TP1 lock
-3R of profit (measured monotone to 3.0, +3R over BE-lock).
+Phase-4 adoptions (all measured on the 321-cell universe):
+`fill_cnd_max=1.0` — cancel limit fills on >1.0-ATR fill bars (wide fill
+candle = momentum slicing through the limit; ≤0.74A → 83% WR, ≥1.35A → 50%)
+restores WR 57.9→66.7% at −3.9R; `border_pass 6→9` (+3.2R, band measured:
+12 breaks the 60% floor); `rg_dirs=0` short rip-fades allowed (+1.1R);
+`rg_cloc=0.95` capitulation-close ≤0.35/≥0.65 (+5.4R stacked with dirs=0);
+`rg_nobull=0` fades no longer banned in BTC bull (+5.6R); `rg_adxlo=14` (+1R);
+`rg_tp_m=1.2` (+1.1R). Confidence tiers refit on the 90-trade set: nf≥4 →
+86% WR (14t/+30.6R), nf 2–3 → ~60%, nf≤1 → 55%.
+
+Per-tier coverage (all tiers trade now): MAJOR 2t/100%/+3.6R, BIG 10t/60%/
++11.7R, MID 18t/50%/+17.5R, SMALL 60t/63%/+66.3R.
 
 ## Adopted deltas (each measured; cumulative order)
 
