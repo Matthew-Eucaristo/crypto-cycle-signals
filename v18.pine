@@ -15,7 +15,7 @@ indicator("Adaptive Signals V18 — Self-Calibrating Quant", shorttitle="Signals
 //   per-TF crypto gate bump 4/8/5 (15m/1h/4h) — the 15m gate was over-priced
 //   (+24.9R at held floor), 4h 8→6 (+4.8R), 15m min $-liquidity 800k/s,
 //   border band widened 6→9, range fades opened (Both dirs, no cycle ban,
-//   capitulation-close ≤0.35/≥0.65, ADX floor 14, TP×1.2, ext 2.8, rsi 34/66,
+//   capitulation-close ≤0.39/≥0.61, ADX floor 14, TP×1.2, ext 2.8, rsi 34/66,
 //   volRank 62, trend volRank floor 45), pullback window 6→2
 //   (stale EMA25 taps dilute; fresh taps only).
 //   short TP ×3, tight short trail ×0.05, longer pullback validity 15b,
@@ -849,9 +849,9 @@ bool rangeShort = false
 if rgMode and chartSec >= 3600 and barstate.isconfirmed and not tradeActive and pendDir == 0 and cooldownOK and liqOK and liveSession
     if adx < rgAdxHi and adx >= rgAdxLo and er32 < 0.15 and volRank >= rgVolrMin
         float devA = (ema50 - close) / atr
-        if devA >= rgExt and rsi <= 34.0 and closeLocation <= 0.35 and rgDirs != "Short only" and (rgCycle != "Aligned" or not btcCycBear)
+        if devA >= rgExt and rsi <= 34.0 and closeLocation <= 0.39 and rgDirs != "Short only" and (rgCycle != "Aligned" or not btcCycBear)
             rangeLong := true
-        else if devA <= -rgExt and rsi >= 66.0 and closeLocation >= 0.65 and rgDirs != "Long only" and (rgCycle != "Aligned" or not btcCycBull)
+        else if devA <= -rgExt and rsi >= 66.0 and closeLocation >= 0.61 and rgDirs != "Long only" and (rgCycle != "Aligned" or not btcCycBull)
             rangeShort := true
         if rgCycle == "No bull fades" and btcCycBull
             rangeLong := false
