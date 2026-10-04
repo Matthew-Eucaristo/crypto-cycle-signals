@@ -6,12 +6,14 @@ indicator("Adaptive Signals V18 — Self-Calibrating Quant", shorttitle="Signals
 // percentile windows + HTF ladder scale to the chart timeframe. Research-only.
 // Default action is WAIT.
 //
-// V18 — measured wins over V17 (+58.0R → +164.2R on expanded 107-perp universe):
-//   phase-4 adoptions (129t / 62.0% WR / PF 4.36): fill-bar candle filter
+// V18 — measured wins over V17 (+58.0R → +195.8R on expanded 107-perp universe):
+//   phase-4 adoptions (154t / 61.0% WR / PF 4.26): fill-bar candle filter
 //   (wide fill candles = momentum slicing the limit → reject; per-TF 0.8/0.875/1.5A),
 //   pullback limit deepened 0.35→0.45A,
 //   exits re-fit on the widened pool: short TP ×3→×2.5, long TP ×1.2→×1.8,
 //   short trail 0.05→0.02, hold 128→256b (4h floor 288b),
+//   per-TF crypto gate bump 4/8/6 (15m/1h/4h) — the 15m gate was over-priced
+//   (+24.9R at held floor), 4h 8→6 (+4.8R), 15m min $-liquidity 800k/s,
 //   border band widened 6→9, range fades opened (Both dirs, no cycle ban,
 //   capitulation-close ≤0.35/≥0.65, ADX floor 14, TP×1.2, ext 2.8, rsi 34/66,
 //   volRank 62, trend volRank floor 45).
@@ -721,7 +723,7 @@ float shortScore = f_dir_score(false, shortTrap ? 6.0 : 0.0)
 // Churn thermostat: repeated raw setups in 64 bars = churn, raise the gate.
 float cumRaw = ta.cum(anyRaw ? 1.0 : 0.0)
 int churnN = int(cumRaw - nz(cumRaw[64], 0.0))
-float adaptiveGate = f_clamp(baseScoreGate + (isCryptoProf ? 8.0 : 0.0) + (chopVeto ? 8.0 : 0.0) - 6.0 * er32 + math.max(0, churnN - 6) * 0.75, 58.0, 86.0)
+float adaptiveGate = f_clamp(baseScoreGate + (isCryptoProf ? (chartSec < 3600 ? 4.0 : chartSec >= 14400 ? 6.0 : 8.0) : 0.0) + (chopVeto ? 8.0 : 0.0) - 6.0 * er32 + math.max(0, churnN - 6) * 0.75, 58.0, 86.0)
 
 var int lastSignalBar = na
 // V5 lesson: cooldown stretches in inefficient tape, relaxes in trends;

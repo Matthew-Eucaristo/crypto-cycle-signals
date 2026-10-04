@@ -10,13 +10,13 @@ Honest sim (next-open/limit fills, slippage+fees), Binance USDT-M perps.
 | BASE17 on final universe | 101 syms × 3 TF | 44 | 77.3% | +1.32 | +58.0 | 6.5 |
 | v18 phase-3 (A+B tiers) | 101 syms × 3 TF | 70 | 64.3% | +1.90 | +133.1 | 6.24 |
 | v18 phase-3 config on 107-perp universe | 107 syms × 3 TF | 76 | 57.9% | +1.11 | +84.1 | 3.62 |
-| **v18 final (phase-4, on 107-perp)** | **107 syms × 3 TF** | **129** | **62.0%** | **+1.27** | **+164.2** | **4.36** |
+| **v18 final (phase-4, on 107-perp)** | **107 syms × 3 TF** | **154** | **61.0%** | **+1.27** | **+195.8** | **4.26** |
 
 Universe expanded mid-session: +6 tier-2 perps (ONDO, HYPE, 1000PEPE,
 1000FLOKI, ZRO, EIGEN) → 321 cells, and all histories appended through
 2026-09-28. The phase-3 config re-measured on the bigger universe drops to
 +84.1R / 57.9% WR (below the 60% floor) — phase-4 adoptions restore both:
-**+164.2R / 62.0% WR** with 129 trades (the most signals yet at ≥60% WR).
+**+195.8R / 61.0% WR** with 154 trades (the most signals yet at ≥60% WR).
 
 Phase-4 adoptions (all measured on the 321-cell universe):
 `fill_cnd_max=1.0` — cancel limit fills on >1.0-ATR fill bars (wide fill
@@ -30,7 +30,9 @@ unlocks the biggest frequency lane, +46R gross); per-TF `fill_cnd_max`
 trend `vl_lo=45`; `pull_entry=0.45` (deeper limit fill → better entry price);
 exit re-fit on the widened pool: `s_tp_m 3.0→2.5` (+19.7R — short runners were
 overtargeted), `l_tp_m 1.2→1.8` (long runners underfed), `s_trail_m 0.02`,
-`maxHoldBars 256` (4h 288 — winners were cut by the clock, not the structure). Confidence tiers refit on the 90-trade set: nf≥4 →
+`maxHoldBars 256` (4h 288 — winners were cut by the clock, not the structure);
+per-TF `cryptoGateBump` 4/8/6 on 15m/1h/4h (+24.9R/+4.8R — the flat +8 bump
+was over-priced on fast frames) and 15m `minDps=800` ($-liquidity floor). Confidence tiers refit on the 90-trade set: nf≥4 →
 86% WR, nf 2–3 → ~60%, nf≤1 → 55%.
 
 Per-tier coverage (all tiers trade now): MAJOR 2t/100%/+3.6R, BIG 10t/60%/
