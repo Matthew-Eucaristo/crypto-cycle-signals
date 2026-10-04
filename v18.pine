@@ -163,7 +163,8 @@ float costBps = input.float(10.0, "Commissions round-trip (bps)", minval=0.0, ma
 bool protectAfterTP1 = input.bool(true, "Protect after TP1", group=G_ADV, active=showAdv, display=display.none)
 bool trailAfterTP2 = input.bool(true, "Trail after TP2", group=G_ADV, active=showAdv, display=display.none)
 bool showStructure = input.bool(true, "Show SMC structure", group=G_ADV, active=showAdv, display=display.none)
-bool showDiag = input.bool(true, "Diagnostic markers", tooltip="Tiny ✕ labels mark bars where a score cleared the gate but another check blocked the signal (HTF/TRIG/FLOW/ROOM/COOL/PEND/TRADE/DIR/DPS/VLR/S>L). Also plots score vs gate in the data pane.", group=G_SET)
+string diagMode = input.string("Labels", "Near-miss markers", options=["Off", "Dots", "Labels"], tooltip="Bars where a score cleared the gate but another check blocked it. Off = clean chart. Dots = tiny dot only (low-confidence ideas still visible, minimal look). Labels = blocking-gate tag + score/gate lines in the data pane.", group=G_SET)
+bool showDiag = diagMode != "Off"
 
 // TIMEFRAME-ADAPTIVE WINDOWS (identical to V10 values on 15m)
 // Non-time-based charts (renko/range/etc.) report na seconds — fall back to
@@ -878,11 +879,17 @@ if longSignalAny or shortSignalAny
 // DIAGNOSTICS: where a score cleared the gate but no signal fired, tag the blocker.
 if showDiag and barstate.isconfirmed
     if longScore >= adaptiveGate and not longSignalAny
-        string rL = tradeActive ? "TRADE" : not pendFree ? "PEND" : not cooldownOK ? "COOL" : not dirLongOK ? "DIR" : not longRaw ? (not longRegime ? "HTF" : not longTrig ? "TRIG" : not volGateL ? "VOLG" : chopVeto ? "CHOP" : volSpikeVeto ? "VSPIKE" : deadVolVeto ? "DEADV" : rsi >= 76.0 ? "RSI76" : diPlus < diMinus ? "DI" : not longFlowOK ? "FLOW" : not longX ? "X" : not liveSession ? "SESS" : not liqOK ? "DPS" : volRank < vlFloor ? "VLR" : "RAW") : not longRoomOK ? "ROOM" : (shortRaw and shortScore > longScore) ? "S>L" : "?"
-        label.new(bar_index, low, "\u2715L " + str.tostring(longScore, "#") + " " + rL, yloc=yloc.belowbar, style=label.style_none, color=color.new(C_MUTE, 40), textcolor=color.new(#9aa0ac, 0), size=size.tiny, force_overlay=true)
+        if diagMode == "Dots"
+            label.new(bar_index, low, "\u00B7", yloc=yloc.belowbar, style=label.style_none, color=color.new(C_MUTE, 40), textcolor=color.new(#9aa0ac, 55), size=size.small, force_overlay=true)
+        else
+            string rL = tradeActive ? "TRADE" : not pendFree ? "PEND" : not cooldownOK ? "COOL" : not dirLongOK ? "DIR" : not longRaw ? (not longRegime ? "HTF" : not longTrig ? "TRIG" : not volGateL ? "VOLG" : chopVeto ? "CHOP" : volSpikeVeto ? "VSPIKE" : deadVolVeto ? "DEADV" : rsi >= 76.0 ? "RSI76" : diPlus < diMinus ? "DI" : not longFlowOK ? "FLOW" : not longX ? "X" : not liveSession ? "SESS" : not liqOK ? "DPS" : volRank < vlFloor ? "VLR" : "RAW") : not longRoomOK ? "ROOM" : (shortRaw and shortScore > longScore) ? "S>L" : "?"
+            label.new(bar_index, low, "\u2715L " + str.tostring(longScore, "#") + " " + rL, yloc=yloc.belowbar, style=label.style_none, color=color.new(C_MUTE, 40), textcolor=color.new(#9aa0ac, 0), size=size.tiny, force_overlay=true)
     if shortScore >= adaptiveGate and not shortSignalAny
-        string rS = tradeActive ? "TRADE" : not pendFree ? "PEND" : not cooldownOK ? "COOL" : not dirShortOK ? "DIR" : not shortRaw ? (not shortRegime ? "HTF" : not shortTrig ? "TRIG" : not volGateS ? "VOLG" : chopVeto ? "CHOP" : volSpikeVeto ? "VSPIKE" : deadVolVeto ? "DEADV" : rsi <= 24.0 ? "RSI24" : diMinus < diPlus ? "DI" : not shortFlowOK ? "FLOW" : not shortX ? "X" : not liveSession ? "SESS" : not liqOK ? "DPS" : volRank < vlFloor ? "VLR" : "RAW") : not shortRoomOK ? "ROOM" : longSignalAny ? "LWIN" : "?"
-        label.new(bar_index, high, "\u2715S " + str.tostring(shortScore, "#") + " " + rS, yloc=yloc.abovebar, style=label.style_none, color=color.new(C_MUTE, 40), textcolor=color.new(#9aa0ac, 0), size=size.tiny, force_overlay=true)
+        if diagMode == "Dots"
+            label.new(bar_index, high, "\u00B7", yloc=yloc.abovebar, style=label.style_none, color=color.new(C_MUTE, 40), textcolor=color.new(#9aa0ac, 55), size=size.small, force_overlay=true)
+        else
+            string rS = tradeActive ? "TRADE" : not pendFree ? "PEND" : not cooldownOK ? "COOL" : not dirShortOK ? "DIR" : not shortRaw ? (not shortRegime ? "HTF" : not shortTrig ? "TRIG" : not volGateS ? "VOLG" : chopVeto ? "CHOP" : volSpikeVeto ? "VSPIKE" : deadVolVeto ? "DEADV" : rsi <= 24.0 ? "RSI24" : diMinus < diPlus ? "DI" : not shortFlowOK ? "FLOW" : not shortX ? "X" : not liveSession ? "SESS" : not liqOK ? "DPS" : volRank < vlFloor ? "VLR" : "RAW") : not shortRoomOK ? "ROOM" : longSignalAny ? "LWIN" : "?"
+            label.new(bar_index, high, "\u2715S " + str.tostring(shortScore, "#") + " " + rS, yloc=yloc.abovebar, style=label.style_none, color=color.new(C_MUTE, 40), textcolor=color.new(#9aa0ac, 0), size=size.tiny, force_overlay=true)
 
 // WHY / WAIT
 string waitReason = "WAIT"
