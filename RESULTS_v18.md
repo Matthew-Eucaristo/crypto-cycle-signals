@@ -10,13 +10,13 @@ Honest sim (next-open/limit fills, slippage+fees), Binance USDT-M perps.
 | BASE17 on final universe | 101 syms × 3 TF | 44 | 77.3% | +1.32 | +58.0 | 6.5 |
 | v18 phase-3 (A+B tiers) | 101 syms × 3 TF | 70 | 64.3% | +1.90 | +133.1 | 6.24 |
 | v18 phase-3 config on 107-perp universe | 107 syms × 3 TF | 76 | 57.9% | +1.11 | +84.1 | 3.62 |
-| **v18 final (phase-4, on 107-perp)** | **107 syms × 3 TF** | **213** | **61.0%** | **+1.26** | **+267.7** | **4.19** |
+| **v18 final (phase-4, on 107-perp)** | **107 syms × 3 TF** | **213** | **61.0%** | **+1.27** | **+269.4** | **4.21** |
 
 Universe expanded mid-session: +6 tier-2 perps (ONDO, HYPE, 1000PEPE,
 1000FLOKI, ZRO, EIGEN) → 321 cells, and all histories appended through
 2026-09-28. The phase-3 config re-measured on the bigger universe drops to
 +84.1R / 57.9% WR (below the 60% floor) — phase-4 adoptions restore both:
-**+267.7R / 61.0% WR** with 213 trades (the most signals yet at ≥60% WR).
+**+269.4R / 61.0% WR** with 213 trades (the most signals yet at ≥60% WR).
 
 Phase-4 adoptions (all measured on the 321-cell universe):
 `fill_cnd_max=1.0` — cancel limit fills on >1.0-ATR fill bars (wide fill

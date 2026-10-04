@@ -6,8 +6,8 @@ indicator("Adaptive Signals V18 — Self-Calibrating Quant", shorttitle="Signals
 // percentile windows + HTF ladder scale to the chart timeframe. Research-only.
 // Default action is WAIT.
 //
-// V18 — measured wins over V17 (+58.0R → +267.7R on expanded 107-perp universe):
-//   phase-4 adoptions (213t / 61.0% WR / PF 4.19): fill-bar candle filter
+// V18 — measured wins over V17 (+58.0R → +269.4R on expanded 107-perp universe):
+//   phase-4 adoptions (213t / 61.0% WR / PF 4.21): fill-bar candle filter
 //   (wide fill candles = momentum slicing the limit → reject; per-TF 0.7/0.875/1.5A),
 //   pullback limit deepened 0.35→0.45A,
 //   exits re-fit on the widened pool: short TP ×3→×2.5, long TP ×1.2→×1.8,
@@ -136,7 +136,7 @@ float roomMinR = input.float(1.2, "Min room to HTF wall (R)", minval=0.5, maxval
 float pullEntryATR = input.float(0.45, "Pullback limit entry (ATR)", minval=0.0, maxval=1.0, step=0.05, tooltip="Post a limit order pullEntryATR*ATR inside the signal close, valid for PullWait bars. 0 = fill at next bar open.", group=G_ADV, active=showAdv, display=display.none)
 int pullWait = input.int(15, "Pullback order validity (bars)", minval=1, maxval=30, group=G_ADV, active=showAdv, display=display.none)
 float sTpM = input.float(2.5, "Short TP multiplier", minval=0.5, maxval=5.0, step=0.1, group=G_ADV, active=showAdv, display=display.none)
-float lTpM = input.float(3.5, "Long TP multiplier", minval=0.5, maxval=5.0, step=0.1, group=G_ADV, active=showAdv, display=display.none)
+float lTpM = input.float(3.75, "Long TP multiplier", minval=0.5, maxval=5.0, step=0.1, group=G_ADV, active=showAdv, display=display.none)
 float sTrailM = input.float(0.02, "Short trail multiplier", minval=0.02, maxval=2.0, step=0.01, group=G_ADV, active=showAdv, display=display.none)
 float lTrailM = input.float(0.3, "Long trail multiplier", minval=0.1, maxval=2.0, step=0.1, group=G_ADV, active=showAdv, display=display.none)
 float sPullM = input.float(1.5, "Short pullback depth multiplier", minval=0.5, maxval=3.0, step=0.1, group=G_ADV, active=showAdv, display=display.none)
