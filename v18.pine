@@ -6,11 +6,12 @@ indicator("Adaptive Signals V18 — Self-Calibrating Quant", shorttitle="Signals
 // percentile windows + HTF ladder scale to the chart timeframe. Research-only.
 // Default action is WAIT.
 //
-// V18 — measured wins over V17 (+58.0R → +99.2R on expanded 107-perp universe):
-//   phase-4 adoptions (90t / 61.1% WR / PF 3.71): fill-bar candle filter 1.0A
-//   (wide fill candles = momentum slicing the limit → reject, keeps WR≥60%),
+// V18 — measured wins over V17 (+58.0R → +125.7R on expanded 107-perp universe):
+//   phase-4 adoptions (119t / 60.5% WR / PF 3.65): fill-bar candle filter
+//   (wide fill candles = momentum slicing the limit → reject; per-TF 0.8/0.875/1.5A),
 //   border band widened 6→9, range fades opened (Both dirs, no cycle ban,
-//   capitulation-close ≤0.35/≥0.65, ADX floor 14, TP×1.2).
+//   capitulation-close ≤0.35/≥0.65, ADX floor 14, TP×1.2, ext 2.8, rsi 34/66,
+//   volRank 62, trend volRank floor 45).
 //   short TP ×3, tight short trail ×0.05, longer pullback validity 15b,
 //   volRank≥35 entry floor, long post-TP1 +1R lock, no TP1 partial,
 //   range TP ×1.5, range pull 0.5×, tighter stop 2.5A, border-pass B-tier
@@ -133,20 +134,20 @@ float lTpM = input.float(1.2, "Long TP multiplier", minval=0.5, maxval=3.0, step
 float sTrailM = input.float(0.05, "Short trail multiplier", minval=0.05, maxval=2.0, step=0.05, group=G_ADV, active=showAdv, display=display.none)
 float lGb = input.float(1.25, "Long post-TP1 lock (R)", minval=0.0, maxval=3.0, step=0.1, group=G_ADV, active=showAdv, display=display.none)
 float sGb = input.float(3.0, "Short post-TP1 lock (R)", minval=0.0, maxval=3.0, step=0.1, group=G_ADV, active=showAdv, display=display.none)
-float vlFloor = input.float(35.0, "Min volume rank", minval=0.0, maxval=60.0, step=5.0, group=G_ADV, active=showAdv, display=display.none)
+float vlFloor = input.float(45.0, "Min volume rank", minval=0.0, maxval=60.0, step=5.0, group=G_ADV, active=showAdv, display=display.none)
 bool showB = input.bool(true, "B-tier signals (border pass)", tooltip="Borderline setups promoted when ER>=0.35 + room: score within 9 pts under the A gate in efficient tape. Band width measured on the 107-perp universe (9 optimal; 12 breaks the 60% WR floor).", group=G_ADV, active=showAdv, display=display.none)
 bool learnTargets = input.bool(false, "Adaptive TP (learned shrink)", tooltip="OFF = fixed targets (measured +14R better on the strict config). ON = shrink targets toward learned MFE quantiles.", group=G_ADV, active=showAdv, display=display.none)
 bool rgMode = input.bool(true, "Range-fade module (1h+)", tooltip="Mean-reversion fades in chop regimes (ADX<20, ER<0.15): fade >=2.2-ATR deviations back to EMA50. Auto-off below 1h — measured net loss on 15m.", group=G_ADV, active=showAdv, display=display.none)
-float rgExt = input.float(2.6, "Range fade extension (ATR)", minval=1.0, maxval=4.0, step=0.1, group=G_ADV, active=showAdv, display=display.none)
+float rgExt = input.float(2.8, "Range fade extension (ATR)", minval=1.0, maxval=4.0, step=0.1, group=G_ADV, active=showAdv, display=display.none)
 float rgStopATR = input.float(1.5, "Range fade stop (ATR)", minval=0.8, maxval=3.0, step=0.1, group=G_ADV, active=showAdv, display=display.none)
-float rgVolrMin = input.float(55.0, "Range fade min volume rank", minval=0, maxval=100, step=5, group=G_ADV, active=showAdv, display=display.none)
+float rgVolrMin = input.float(62.0, "Range fade min volume rank", minval=0, maxval=100, step=5, group=G_ADV, active=showAdv, display=display.none)
 float rgAdxLo = input.float(14.0, "Range fade ADX floor", minval=0, maxval=25, step=1, group=G_ADV, active=showAdv, display=display.none)
 float rgAdxHi = input.float(20.0, "Range fade ADX ceiling", minval=10, maxval=35, step=1, group=G_ADV, active=showAdv, display=display.none)
 string rgDirs = input.string("Both", "Range fade directions", options=["Long only", "Both", "Short only"], tooltip="Both measured best on the 107-perp universe: short rip-fades add net R once the capitulation-close filter is on (fades require close in the extreme 35% of the bar).", group=G_ADV, active=showAdv, display=display.none)
 string rgCycle = input.string("Any", "Range fades vs BTC cycle", options=["Any", "No bull fades", "Aligned"], tooltip="Any measured best on the 107-perp universe (+5.6R): fading during bull is no longer an auto-loser once the capitulation-close filter gates entries.", group=G_ADV, active=showAdv, display=display.none)
 float minDollarFlow = input.float(0.0, "Min dollar volume $/s (0=off)", minval=0, maxval=100000, step=50, tooltip="Median close*volume per second over 96 bars. Charts under 1h always enforce >=600 (measured win); set a value here to also filter slow charts.", group=G_ADV, active=showAdv, display=display.none)
 float pbVolGate = input.float(30.0, "Pullback min volume percentile", tooltip="Resume bars are low-volume by nature; dips get their own, softer volume gate.", minval=10, maxval=70, step=5, group=G_ADV, active=showAdv, display=display.none)
-float fillCndMax = input.float(1.0, "Max fill-bar candle range (ATR)", minval=0.0, maxval=3.0, step=0.1, tooltip="0=off. Cancels the limit order when the fill bar's range exceeds 1.0 ATR — a wide candle means momentum is slicing through the limit (measured: <=0.74A → 83% WR, >=1.35A → 50% WR).", group=G_ADV, active=showAdv, display=display.none)
+float fillCndMax = input.float(0.875, "Max fill-bar candle range (ATR)", minval=0.0, maxval=3.0, step=0.025, tooltip="0=off. Cancels the limit order when the fill bar's range exceeds this many ATR — a wide candle means momentum is slicing through the limit (measured: <=0.74A → 83% WR, >=1.35A → 50% WR). Auto-scales per TF: <=15m tightens to 0.8, >=4h widens to 1.5.", group=G_ADV, active=showAdv, display=display.none)
 bool tpSmart = input.bool(true, "Cap TP3 at liquidity wall", group=G_ADV, active=showAdv, display=display.none)
 int cooldownBars = input.int(4, "Cooldown (bars)", minval=0, maxval=32, group=G_ADV, active=showAdv, display=display.none)
 float slipBps = input.float(2.0, "Slippage per fill (bps)", minval=0.0, maxval=20.0, step=0.5, group=G_ADV, active=showAdv, display=display.none)
@@ -779,6 +780,7 @@ bool dirShortOK = allowShort and not dirShortLearnedOff
 
 // RISK / TARGETS
 float effStopATR = chartSec >= 14400 ? math.max(stopATR, 3.0) : chartSec >= 3600 ? math.max(stopATR, 2.5) : stopATR
+float effFillCnd = fillCndMax <= 0.0 ? 0.0 : (chartSec >= 14400 ? math.max(fillCndMax, 1.5) : chartSec < 3600 ? math.min(fillCndMax, 0.8) : fillCndMax)
 float baseStopATR = effStopATR + 0.20 * (volRank / 100.0)
 float adaptiveStopATR = f_blend(baseStopATR, learnedStopATR, stopW)
 float longStopPx = close - atr * adaptiveStopATR
@@ -839,9 +841,9 @@ bool rangeShort = false
 if rgMode and chartSec >= 3600 and barstate.isconfirmed and not tradeActive and pendDir == 0 and cooldownOK and liqOK and liveSession
     if adx < rgAdxHi and adx >= rgAdxLo and er32 < 0.15 and volRank >= rgVolrMin
         float devA = (ema50 - close) / atr
-        if devA >= rgExt and rsi <= 32.0 and closeLocation <= 0.35 and rgDirs != "Short only" and (rgCycle != "Aligned" or not btcCycBear)
+        if devA >= rgExt and rsi <= 34.0 and closeLocation <= 0.35 and rgDirs != "Short only" and (rgCycle != "Aligned" or not btcCycBear)
             rangeLong := true
-        else if devA <= -rgExt and rsi >= 68.0 and closeLocation >= 0.65 and rgDirs != "Long only" and (rgCycle != "Aligned" or not btcCycBull)
+        else if devA <= -rgExt and rsi >= 66.0 and closeLocation >= 0.65 and rgDirs != "Long only" and (rgCycle != "Aligned" or not btcCycBull)
             rangeShort := true
         if rgCycle == "No bull fades" and btcCycBull
             rangeLong := false
@@ -1013,7 +1015,7 @@ if pendDir != 0 and bar_index > pendSigBar
     else
         filled := true
         fillPx := fillDir == 1 ? open * (1.0 + slip) : open * (1.0 - slip)
-    if filled and fillCndMax > 0.0 and (high - low) > fillCndMax * atr
+    if filled and effFillCnd > 0.0 and (high - low) > effFillCnd * atr
         filled := false
         pendDir := 0
     if filled
