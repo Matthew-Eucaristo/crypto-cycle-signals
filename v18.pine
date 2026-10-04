@@ -6,8 +6,8 @@ indicator("Adaptive Signals V18 — Self-Calibrating Quant", shorttitle="Signals
 // percentile windows + HTF ladder scale to the chart timeframe. Research-only.
 // Default action is WAIT.
 //
-// V18 — measured wins over V17 (+58.0R → +203.2R on expanded 107-perp universe):
-//   phase-4 adoptions (148t / 63.5% WR / PF 4.73): fill-bar candle filter
+// V18 — measured wins over V17 (+58.0R → +238.4R on expanded 107-perp universe):
+//   phase-4 adoptions (196t / 62.2% WR / PF 4.17): fill-bar candle filter
 //   (wide fill candles = momentum slicing the limit → reject; per-TF 0.7/0.875/1.5A),
 //   pullback limit deepened 0.35→0.45A,
 //   exits re-fit on the widened pool: short TP ×3→×2.5, long TP ×1.2→×1.8,
@@ -145,10 +145,10 @@ bool showB = input.bool(true, "B-tier signals (border pass)", tooltip="Borderlin
 bool learnTargets = input.bool(false, "Adaptive TP (learned shrink)", tooltip="OFF = fixed targets (measured +14R better on the strict config). ON = shrink targets toward learned MFE quantiles.", group=G_ADV, active=showAdv, display=display.none)
 bool rgMode = input.bool(true, "Range-fade module (1h+)", tooltip="Mean-reversion fades in chop regimes (ADX<20, ER<0.15): fade >=2.2-ATR deviations back to EMA50. Auto-off below 1h — measured net loss on 15m.", group=G_ADV, active=showAdv, display=display.none)
 float rgExt = input.float(2.8, "Range fade extension (ATR)", minval=1.0, maxval=4.0, step=0.1, group=G_ADV, active=showAdv, display=display.none)
-float rgStopATR = input.float(1.5, "Range fade stop (ATR)", minval=0.8, maxval=3.0, step=0.1, group=G_ADV, active=showAdv, display=display.none)
+float rgStopATR = input.float(1.4, "Range fade stop (ATR)", minval=0.8, maxval=3.0, step=0.1, group=G_ADV, active=showAdv, display=display.none)
 float rgVolrMin = input.float(62.0, "Range fade min volume rank", minval=0, maxval=100, step=5, group=G_ADV, active=showAdv, display=display.none)
 float rgAdxLo = input.float(14.0, "Range fade ADX floor", minval=0, maxval=25, step=1, group=G_ADV, active=showAdv, display=display.none)
-float rgAdxHi = input.float(20.0, "Range fade ADX ceiling", minval=10, maxval=35, step=1, group=G_ADV, active=showAdv, display=display.none)
+float rgAdxHi = input.float(22.0, "Range fade ADX ceiling", minval=10, maxval=35, step=1, group=G_ADV, active=showAdv, display=display.none)
 string rgDirs = input.string("Both", "Range fade directions", options=["Long only", "Both", "Short only"], tooltip="Both measured best on the 107-perp universe: short rip-fades add net R once the capitulation-close filter is on (fades require close in the extreme 35% of the bar).", group=G_ADV, active=showAdv, display=display.none)
 string rgCycle = input.string("Any", "Range fades vs BTC cycle", options=["Any", "No bull fades", "Aligned"], tooltip="Any measured best on the 107-perp universe (+5.6R): fading during bull is no longer an auto-loser once the capitulation-close filter gates entries.", group=G_ADV, active=showAdv, display=display.none)
 float minDollarFlow = input.float(0.0, "Min dollar volume $/s (0=off)", minval=0, maxval=100000, step=50, tooltip="Median close*volume per second over 96 bars. Charts under 1h always enforce >=600 (measured win); set a value here to also filter slow charts.", group=G_ADV, active=showAdv, display=display.none)
