@@ -164,6 +164,12 @@ bool protectAfterTP1 = input.bool(true, "Protect after TP1", group=G_ADV, active
 bool trailAfterTP2 = input.bool(true, "Trail after TP2", group=G_ADV, active=showAdv, display=display.none)
 bool showStructure = input.bool(true, "Show SMC structure", group=G_ADV, active=showAdv, display=display.none)
 
+// TIMEFRAME-ADAPTIVE WINDOWS (identical to V10 values on 15m)
+// Non-time-based charts (renko/range/etc.) report na seconds — fall back to
+// the 15m-equivalent profile rather than crashing the HTF requests.
+int chartSecRaw = timeframe.in_seconds()
+int chartSec = na(chartSecRaw) ? 900 : chartSecRaw
+
 // Profile presets — measured on the 81-cell universe (27 symbols x 3 TFs).
 float profTp1Frac = tradeProfile == "High WR" ? 0.50 : tradeProfile == "Runner" ? 0.0 : 0.10
 float effTargetR = tradeProfile == "Runner" ? math.max(targetR, 3.5) : targetR
@@ -301,11 +307,6 @@ bool usesNySession = isStockProf or isIndexProf
 bool usdQuotePair = isFxProf and str.endswith(tickerU, "USD") and str.length(tickerU) == 6
 bool usdBasePair = isFxProf and str.startswith(tickerU, "USD") and str.length(tickerU) == 6
 
-// TIMEFRAME-ADAPTIVE WINDOWS (identical to V10 values on 15m)
-// Non-time-based charts (renko/range/etc.) report na seconds — fall back to
-// the 15m-equivalent profile rather than crashing the HTF requests.
-int chartSecRaw = timeframe.in_seconds()
-int chartSec = na(chartSecRaw) ? 900 : chartSecRaw
 int fastLen = int(f_clamp(math.round(172800.0 / chartSec), 96, 768))    // ~48h in bars (15m -> 192)
 int slowLen = int(f_clamp(math.round(604800.0 / chartSec), 192, 2016))  // ~7d in bars (15m -> 672)
 int erLen = int(f_clamp(math.round(28800.0 / chartSec), 16, 64))        // ~8h in bars (15m -> 32)
