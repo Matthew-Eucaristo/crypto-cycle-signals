@@ -26,18 +26,18 @@ Trend signals preempt pending range orders, so the two legs never fight.
 
 | Metric | Value |
 |---|---|
-| Trades | 208 |
+| Trades | 213 |
 | Win rate | **62%** |
 | Avg | +1.37R |
-| Net | +249.1R |
-| Profit factor | 4.1 |
+| Net | +251.0R |
+| Profit factor | 4.0 |
 | vs previous version | +84.1R on the same universe |
 
 Earlier config on the smaller 68-coin universe: 31 trades, 87% WR, +53.6R, PF 13.7.
 
 **Quality preset** (optional): raising the $-liquidity floor trades accuracy for frequency — 4h minDps=200 → 64.4% WR/+195.5R; global minDps=400 → 70.6% WR on 51 trades.
 
-**Frequency: selective but broader.** ~208 signals across 6 years of data on 107 coins — majors, big caps, mid caps and small caps all fire now (coverage: BTC/ETH +3.6R, big caps +11.7R, mid caps +17.5R, small caps +66.3R). It can still sit quiet for weeks on one chart. That's the price of the edge.
+**Frequency: selective but broader.** ~213 signals across 6 years of data on 107 coins — majors, big caps, mid caps and small caps all fire now (coverage: BTC/ETH +3.6R, big caps +11.7R, mid caps +17.5R, small caps +66.3R). It can still sit quiet for weeks on one chart. That's the price of the edge.
 
 ### Where it works / doesn't (measured)
 
