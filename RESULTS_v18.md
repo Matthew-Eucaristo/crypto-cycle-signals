@@ -38,6 +38,10 @@ Fee stress: 3× costs → +176.2R/60.8%; 5× → +152.1R/60.1% — edge survives
 
 **Per-year split** (all years positive): 2021 +18.3 (13t/77%), 2022 +4.7 (9t/56%), 2023 +14.1 (22t/50%), 2024 +36.9 (41t/63%), 2025 +37.4 (60t/53%), 2026 +139.6 (68t/68%). Direction: shorts +208.8 (65% WR, bear-leg heavy), longs +42.3 (52%). Tier coverage: majors 8t/75%, bigcaps 118t/62%, mid/small 87t/59%.
 
+**Aggressive preset** (below the 60% floor — documented, not default): `vetoMode=2`
+relaxes the direction veto → 337t / 49.3% WR / **+322.3R**. The accuracy floor costs ~+53R
+of net; kept as an opt-in for max-net users only.
+
 **Quality preset** (higher accuracy, fewer signals): 4h `minDps=200` →
 135t / 64.4% WR / +195.5R / PF 5.04; global `minDps=400` → 51t / 70.6% / PF 5.65.
 Default stays the max-net config per the ≥60% floor + max frequency criterion. Confidence tiers refit on the 90-trade set: nf≥4 →
